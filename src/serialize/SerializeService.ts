@@ -1,21 +1,8 @@
-export interface ISerializableState {
-  className: string;
-}
-
-export interface ISerializable {
-  serializable: true;
-  readonly id: string;
-  getState: () => ISerializableState;
-  setState: (state: ISerializableState) => void;
-}
-
-function isSerializable(value: any): value is ISerializable {
-  return typeof value === "object" && !!value.serializable;
-}
-
-export interface ISerializableClass {
-  prototype: ISerializable;
-}
+import {
+  ISerializableClass,
+  ISerializable,
+  isSerializable,
+} from "./serialize.interface";
 
 export class SerializeService {
   private _classes: { [key: string]: ISerializableClass } = {};
@@ -47,7 +34,7 @@ export class SerializeService {
     this._objects[obj.id] = obj;
   }
 
-  registerSerializableCollection(arr: ISerializable[]) {
+  registerSerializableObjectsCollection(arr: ISerializable[]) {
     arr.forEach((obj) => this.registerSerializableObject(obj));
   }
 }
