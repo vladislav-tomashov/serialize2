@@ -4,13 +4,14 @@ import {
   ISerializable,
   IGetProperty,
   ISetProperty,
+  TKeyValuePair,
 } from "../serialize.interface";
 import { getContext } from "../../context/context";
 import { ObjectChanges } from "./ObjectChanges";
 import { System } from "../../system/System";
 
 export class BaseSerializable<T extends ISerializableState, K extends keyof T>
-  implements ISerializable<T>, IGetProperty<T, K>, ISetProperty<T, K> {
+  implements ISerializable<T, K>, IGetProperty<T, K>, ISetProperty<T, K> {
   private _id = getId();
 
   protected _state: T = {
@@ -22,6 +23,12 @@ export class BaseSerializable<T extends ISerializableState, K extends keyof T>
 
   get id(): string {
     return this._id;
+  }
+
+  applyChanges(changes: TKeyValuePair<T, K>[]) {
+    changes.forEach(([key, value]) => {
+      this._state[key] = value;
+    });
   }
 
   getState(): T {
@@ -50,19 +57,21 @@ export class BaseSerializable<T extends ISerializableState, K extends keyof T>
   // Interface ISetProperty
   setProperty(prop: K, value: T[K]): void {
     this._state[prop] = value;
-    this._setPropertyChanged(prop, value);
+    this._getChangeObject().setPropertyChanged(prop, value);
   }
 
   // protected and private
-  protected _setPropertyChanged(prop: K, value: T[K]): void {
+  protected _getChangeObject(): ObjectChanges<T, K> {
     const { changes } = getContext() as System;
-    let change = changes.getChange(this);
+    const result = changes.getChangeObject(this) as ObjectChanges<T, K>;
 
-    if (!change) {
-      change = new ObjectChanges<T, K>();
-      changes.setChange(this, change);
+    if (result) {
+      return result;
     }
 
-    change.setPropertyChanged(prop, value);
+    const newChanges = new ObjectChanges<T, K>();
+    changes.setChangeObject(this, newChanges);
+
+    return newChanges;
   }
 }

@@ -1,11 +1,20 @@
-import { IGetProperty, TKeyValuePair } from "../serialize.interface";
+import {
+  IGetProperty,
+  TKeyValuePair,
+  IChangeObject,
+} from "../serialize.interface";
 
-export class ObjectChanges<T, K extends keyof T> {
+export class ObjectChanges<T, K extends keyof T> implements IChangeObject {
   private _log = new Set<K>();
+  
   private _disabled = false;
 
   get disabled() {
     return this._disabled;
+  }
+
+  get hasEntries() {
+    return this._log.size > 0;
   }
 
   enable(): void {

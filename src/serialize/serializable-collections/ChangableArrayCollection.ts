@@ -1,14 +1,6 @@
 import { ArrayCollectionChanges } from "./ArrayCollectionChanges";
 import { ArrayCollection } from "../../collections/ArrayCollection";
 import {
-  IChangable,
-  isChangable,
-  TChanges,
-  IOwnChanges,
-  INestedChanges,
-  TNestedChanges,
-} from "../serialize.interface";
-import {
   TCollectionChange,
   CollectionChangeType,
   TCollectionSpliceChange,
@@ -19,131 +11,111 @@ import {
   TCollectionReverseChange,
   TCollectionSetChange,
 } from "./changable-collections.interface";
+import { ISerializableState, ISerializable } from "../serialize.interface";
+import { getId } from "../../utils/id-utils";
+import { getContext } from "../../context/context";
+import { System } from "../../system/System";
+
+export interface IChangableArrayCollectionState<T> extends ISerializableState {
+  array: T[];
+}
 
 export class ChangableArrayCollection<T> extends ArrayCollection<T>
-  implements IChangable<number>, IOwnChanges, INestedChanges<number> {
-  private _changes = new ArrayCollectionChanges<T>();
+  implements ISerializable<IChangableArrayCollectionState<T>, number> {
+  private _id = getId();
 
-  // implementation of interface IOwnChanges
-  get hasOwnChanges(): boolean {
-    return this._changes.hasEntries;
+  protected _state: IChangableArrayCollectionState<T> = {
+    className: this.getClassName(),
+    array: this._array,
+  };
+
+  // Interface ISerializable
+  serializable: true = true;
+
+  get id(): string {
+    return this._id;
   }
 
-  clearOwnChanges(): void {
-    this._changes.clear();
+  applyChanges(changes: TCollectionChange<T>[]) {
+    changes.forEach((change) => this._applyChange(change));
   }
 
-  getOwnChanges(): TCollectionChange<T>[] {
-    return this._changes.getChanges(super.toArray());
+  getState(): IChangableArrayCollectionState<T> {
+    return this._state;
   }
 
-  setOwnChanges(changes: TCollectionChange<T>[]): void {
-    this.clearOwnChanges();
-    changes.forEach((x) => this._setChange(x));
-  }
-
-  // implementation of interface INestedChanges
-  get hasNestedChanges(): boolean {
-    return this.getChangableEntries().some(([, x]) => x.changed);
-  }
-
-  clearNestedChanges(): void {
-    this.getChangableEntries().forEach(([, x]) => x.clearChanges());
-  }
-
-  getNestedChanges(): TNestedChanges<number> {
-    return this.getChangableEntries()
-      .filter(
-        ([, x]) =>
-          x.changed && !this._changes.isItemChanged((x as unknown) as T)
-      )
-      .map(([prop, x]) => [prop, x.getChanges()] as [number, TChanges<any>]);
-  }
-
-  setNestedChanges(changes: TNestedChanges<number>): void {
-    changes.forEach(([index, change]) => {
-      const changable = (this.get(index) as unknown) as IChangable<number>;
-      changable.setChanges(change);
-    });
-  }
-
-  getChangableEntries(): [number, IChangable<any>][] {
-    if (!this._itemsAreChangable) {
-      return [];
+  setState(state: IChangableArrayCollectionState<T>): void {
+    if (this._state.className !== state.className) {
+      throw new Error(
+        `BaseSerializable.setState(): incoming state className="${state.className}" differs from current className="${this._state.className}"`
+      );
     }
 
-    return this.map((value, index) => {
-      const changable = (value as unknown) as IChangable<number>;
-      return [index, changable];
-    });
+    this._state = state;
   }
 
-  // implementation of interface IChangable
-  isChangable: true = true;
-
-  get changed(): boolean {
-    return this.hasOwnChanges || this.hasNestedChanges;
+  getClassName(): string {
+    return this.constructor.name;
   }
 
-  getChanges(): [TCollectionChange<T>[], TNestedChanges<number>] {
-    return [this.getOwnChanges(), this.getNestedChanges()];
-  }
+  protected _getChangeObject(): ArrayCollectionChanges<T> {
+    const { changes } = getContext() as System;
+    const result = changes.getChangeObject(this) as ArrayCollectionChanges<T>;
 
-  setChanges(changes: [TCollectionChange<T>[], TNestedChanges<number>]): void {
-    const [ownChanges, nestedChanges] = changes;
-    this.setOwnChanges(ownChanges);
-    this.setNestedChanges(nestedChanges);
-  }
+    if (result) {
+      return result;
+    }
 
-  clearChanges(): void {
-    this.clearOwnChanges();
-    this.clearNestedChanges();
+    const newChanges = new ArrayCollectionChanges<T>();
+    changes.setChangeObject(this, newChanges);
+
+    return newChanges;
   }
 
   // redefine some methods from parent
   set(index: number, value: T): void {
     super.set(index, value);
-    this._changes.registerSet(index, value);
+    this._getChangeObject().registerSet(index, value);
   }
 
   pop(): T | undefined {
     const result = super.pop();
-    this._changes.registerPop();
+    this._getChangeObject().registerPop();
     return result;
   }
 
   push(...items: T[]): number {
     const result = super.push(...items);
-    this._changes.registerPush(items);
+    this._getChangeObject().registerPush(items);
     return result;
   }
 
   reverse(): T[] {
     const result = super.reverse();
-    this._changes.registerReverse();
+    this._getChangeObject().registerReverse();
     return result;
   }
 
   clear(): void {
     super.clear();
-    this._changes.registerClear();
+    this._getChangeObject().registerClear();
   }
 
   sort(compareFn?: ((a: T, b: T) => number) | undefined): this {
     super.sort(compareFn);
-    this._changes.registerSort();
+    this._getChangeObject().registerSort();
     return this;
   }
 
   unshift(...items: T[]): number {
     const result = super.unshift(...items);
-    this._changes.registerUnshift(items);
+    this._getChangeObject().registerUnshift(items);
     return result;
   }
 
   shift(): T | undefined {
     const result = super.shift();
-    this._changes.registerShift();
+    this._getChangeObject().registerShift();
     return result;
   }
 
@@ -153,16 +125,12 @@ export class ChangableArrayCollection<T> extends ArrayCollection<T>
 
   splice(start: any, deleteCount?: any, ...rest: any[]) {
     const result = super.splice(start, deleteCount, ...rest);
-    this._changes.registerSplice(start, deleteCount, rest);
+    this._getChangeObject().registerSplice(start, deleteCount, rest);
     return result;
   }
 
-  // private and protected members
-  protected get _itemsAreChangable(): boolean {
-    return !!(this.length && isChangable(this.get(0)));
-  }
-
-  private _setChange(change: TCollectionChange<T>) {
+  // private and protected
+  protected _applyChange(change: TCollectionChange<T>) {
     const [changeType] = change;
 
     switch (changeType) {

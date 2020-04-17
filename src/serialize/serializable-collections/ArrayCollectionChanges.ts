@@ -11,6 +11,7 @@ import {
   TCollectionShiftChange,
   TCollectionSpliceChange,
 } from "./changable-collections.interface";
+import { IChangeObject } from "../serialize.interface";
 
 type TPushChange<T> = [CollectionChangeType.Push, T[]];
 
@@ -75,27 +76,32 @@ function getChange<T>(change: TChange<T>, source: T[]): TCollectionChange<T> {
   }
 }
 
-export class ArrayCollectionChanges<T> {
+export class ArrayCollectionChanges<T> implements IChangeObject {
   private _log: Array<TChange<T>> = [];
 
-  private _itemsInChanges = new Set<T>();
+  private _allItemsChanged = false;
 
-  private __allItemsChanged = false;
+  private _disabled = false;
 
-  private get _allItemsChanged() {
-    return this.__allItemsChanged;
+  get disabled(): boolean {
+    return this._disabled;
   }
 
-  private set _allItemsChanged(value: boolean) {
-    if (this.__allItemsChanged === value) {
+  disable(): void {
+    if (this._disabled) {
       return;
     }
 
-    if (this._itemsInChanges.size > 0) {
-      this._itemsInChanges.clear();
+    this._disabled = true;
+    this.clear();
+  }
+
+  enable(): void {
+    if (!this._disabled) {
+      return;
     }
 
-    this.__allItemsChanged = value;
+    this._disabled = false;
   }
 
   get hasEntries() {
@@ -103,7 +109,7 @@ export class ArrayCollectionChanges<T> {
   }
 
   registerSplice(start: number, deleteCount: number, items: T[]) {
-    if (this._allItemsChanged) {
+    if (this._allItemsChanged || this._disabled) {
       return;
     }
 
@@ -115,23 +121,19 @@ export class ArrayCollectionChanges<T> {
     ] as TSpliceChange<T>;
 
     this._log.push(change);
-
-    items.forEach((x) => this._itemsInChanges.add(x));
   }
 
   registerSet(index: number, value: T) {
-    if (this._allItemsChanged) {
+    if (this._allItemsChanged || this._disabled) {
       return;
     }
 
     const change = [CollectionChangeType.Set, index, value] as TSetChange<T>;
     this._log.push(change);
-
-    this._itemsInChanges.add(value);
   }
 
   registerPop() {
-    if (this._allItemsChanged) {
+    if (this._allItemsChanged || this._disabled) {
       return;
     }
 
@@ -140,7 +142,7 @@ export class ArrayCollectionChanges<T> {
   }
 
   registerShift() {
-    if (this._allItemsChanged) {
+    if (this._allItemsChanged || this._disabled) {
       return;
     }
 
@@ -149,7 +151,7 @@ export class ArrayCollectionChanges<T> {
   }
 
   registerClear() {
-    if (this._allItemsChanged) {
+    if (this._allItemsChanged || this._disabled) {
       return;
     }
 
@@ -160,7 +162,7 @@ export class ArrayCollectionChanges<T> {
   }
 
   registerSort() {
-    if (this._allItemsChanged) {
+    if (this._allItemsChanged || this._disabled) {
       return;
     }
 
@@ -171,7 +173,7 @@ export class ArrayCollectionChanges<T> {
   }
 
   registerReverse() {
-    if (this._allItemsChanged) {
+    if (this._allItemsChanged || this._disabled) {
       return;
     }
 
@@ -182,46 +184,30 @@ export class ArrayCollectionChanges<T> {
   }
 
   registerPush(items: T[]) {
-    if (this._allItemsChanged) {
+    if (this._allItemsChanged || this._disabled) {
       return;
     }
 
     const change = [CollectionChangeType.Push, items] as TPushChange<T>;
     this._log.push(change);
-
-    items.forEach((x) => this._itemsInChanges.add(x));
   }
 
   registerUnshift(items: T[]) {
-    if (this._allItemsChanged) {
+    if (this._allItemsChanged || this._disabled) {
       return;
     }
 
     const change = [CollectionChangeType.Unshift, items] as TUnshiftChange<T>;
     this._log.push(change);
-
-    items.forEach((x) => this._itemsInChanges.add(x));
   }
 
   getChanges(source: T[]): TCollectionChange<T>[] {
     return this._log.map((x) => getChange(x, source));
   }
 
-  isItemChanged(item: T): boolean {
-    if (this._allItemsChanged) {
-      return true;
-    }
-
-    return this._itemsInChanges.has(item);
-  }
-
   clear() {
     if (this._log.length > 0) {
       this._log = [];
-    }
-
-    if (this._itemsInChanges.size > 0) {
-      this._itemsInChanges.clear();
     }
 
     if (this._allItemsChanged) {

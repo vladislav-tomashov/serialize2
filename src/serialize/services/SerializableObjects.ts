@@ -1,9 +1,9 @@
 import { ISerializable, isSerializable } from "../serialize.interface";
 
 export class SerializableObjects {
-  private _objects: { [key: string]: ISerializable<any> } = {};
+  private _objects: { [key: string]: ISerializable<any, any> } = {};
 
-  addObject(obj: ISerializable<any>): void {
+  addObject(obj: ISerializable<any, any>): void {
     if (!isSerializable(obj)) {
       throw new Error(
         `Object does not implement interface ISerializable: ${obj}`
@@ -20,7 +20,7 @@ export class SerializableObjects {
   }
 
   deleteObject(id: string): void;
-  deleteObject(obj: ISerializable<any>): void;
+  deleteObject(obj: ISerializable<any, any>): void;
   deleteObject(idOrObj: any): void {
     if (typeof idOrObj === "string") {
       const id = idOrObj;
@@ -40,12 +40,12 @@ export class SerializableObjects {
     delete this._objects[obj.id];
   }
 
-  addCollection(arr: ISerializable<any>[]): void {
+  addCollection(arr: ISerializable<any, any>[]): void {
     arr.forEach((obj) => this.addObject(obj));
   }
 
   hasObject(id: string): boolean;
-  hasObject(obj: ISerializable<any>): boolean;
+  hasObject(obj: ISerializable<any, any>): boolean;
   hasObject(idOrObj: any): boolean {
     if (typeof idOrObj === "string") {
       const id = idOrObj;

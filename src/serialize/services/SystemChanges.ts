@@ -1,14 +1,13 @@
-import { ISerializable } from "../serialize.interface";
-import { ObjectChanges } from "../serializable-object/ObjectChanges";
+import { ISerializable, IChangeObject } from "../serialize.interface";
 import { getContext } from "../../context/context";
 import { System } from "../../system/System";
 
 export class SystemChanges {
-  private _changes = new Map<ISerializable<any>, ObjectChanges<any, any>>();
+  private _changes = new Map<ISerializable<any, any>, IChangeObject>();
 
-  private _newObjects = new Set<ISerializable<any>>();
+  private _newObjects = new Set<ISerializable<any, any>>();
 
-  setChange(obj: ISerializable<any>, change: ObjectChanges<any, any>): void {
+  setChangeObject(obj: ISerializable<any, any>, change: IChangeObject): void {
     const { objects } = getContext() as System;
 
     if (!objects.hasObject(obj)) {
@@ -19,11 +18,11 @@ export class SystemChanges {
     this._changes.set(obj, change);
   }
 
-  getChange(obj: ISerializable<any>): ObjectChanges<any, any> | undefined {
+  getChangeObject(obj: ISerializable<any, any>): IChangeObject | undefined {
     return this._changes.get(obj);
   }
 
-  deleteChange(obj: ISerializable<any>): boolean {
+  deleteChangeObject(obj: ISerializable<any, any>): boolean {
     this._newObjects.delete(obj);
     return this._changes.delete(obj);
   }
