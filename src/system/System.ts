@@ -1,14 +1,21 @@
-import { SerializeService } from "../serialize/SerializeService";
-import { Class1Serializable } from "../examples/Class1Serializable";
+import { SerializableClasses } from "../serialize/services/SerializableClasses";
+import { SystemChanges } from "../serialize/services/SystemChanges";
+import { SerializableObjects } from "../serialize/services/SerializableObjects";
 
 export class System {
-  private _serializeService = new SerializeService();
+  private _classes = new SerializableClasses();
+  private _objects = new SerializableObjects();
+  private _changes = new SystemChanges();
 
-  constructor() {
-    this._serializeService.registerSerializableClass("Class1Serializable", Class1Serializable);
+  get changes() {
+    return this._changes;
+  }
+
+  get classes() {
+    return this._classes;
+  }
+
+  get objects() {
+    return this._objects;
   }
 }
-
-/*
-
-*/

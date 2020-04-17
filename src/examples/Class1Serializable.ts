@@ -1,6 +1,6 @@
 import { IClass1 } from "./IClass1";
 import { ChangableArrayCollection } from "../serialize/serializable-collections/ChangableArrayCollection";
-import { SerializableBase } from "../serialize/SerializableBase";
+import { BaseSerializable } from "../serialize/serializable-object/BaseSerializable";
 import { ISerializableState } from "../serialize/serialize.interface";
 
 export interface IClass1State extends ISerializableState {
@@ -13,14 +13,20 @@ export interface IClass1State extends ISerializableState {
 export type IClass1StateKey = keyof IClass1State;
 
 export class Class1Serializable
-  extends SerializableBase<IClass1State, IClass1StateKey>
+  extends BaseSerializable<IClass1State, IClass1StateKey>
   implements IClass1 {
   // not serializable
   private _prop4: string;
 
   constructor(arg1: number, arg2: string) {
+    // Call base class constructor
     super();
 
+    // Init properties with default values
+    this._prop1 = "Hello!";
+    this._prop2 = 0;
+
+    // Copied from Class1 constructor
     if (arg1 === 1) {
       this._prop2 = 5;
       this._prop4 = "goodbye";

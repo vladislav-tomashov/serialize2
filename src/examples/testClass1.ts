@@ -1,7 +1,13 @@
 import { Class1Serializable } from "./Class1Serializable";
+import { System } from "../system/System";
+import { setContext } from "../context/context";
 
 console.log("");
 console.log("========== Class1Serializable tests ==========");
+
+const system = new System();
+system.classes.addClass("Class1Serializable", Class1Serializable);
+setContext(system);
 
 const a = new Class1Serializable(1, "a");
 // const serializedA = JSON.stringify(a);

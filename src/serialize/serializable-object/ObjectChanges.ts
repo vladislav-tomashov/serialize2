@@ -1,29 +1,42 @@
-import { IGetProperty } from "./serializable-object.interface";
-import { TPropertyChange } from "../serialize.interface";
+import { IGetProperty, TKeyValuePair } from "../serialize.interface";
 
 export class ObjectChanges<T, K extends keyof T> {
   private _log = new Set<K>();
-
   private _disabled = false;
 
-  get hasEnries() {
-    return this._log.size > 0;
+  get disabled() {
+    return this._disabled;
   }
 
-  registerPropertyUpdate(prop: K) {
+  enable(): void {
+    if (!this._disabled) {
+      return;
+    }
+
+    this._disabled = false;
+  }
+
+  disable(): void {
+    if (this._disabled) {
+      return;
+    }
+
+    this._disabled = true;
+    this.clear();
+  }
+
+  setPropertyChanged(prop: K, value: T[K]) {
+    if (this._disabled) {
+      return;
+    }
+
     this._log.add(prop);
   }
 
-  getChanges(source: IGetProperty<T, K>): TPropertyChange<any>[] {
-    const result = Array.from(this._log).map(
-      (x) => [x, source.getProperty(x)] as TPropertyChange<any>
+  getChanges(source: IGetProperty<T, K>): TKeyValuePair<T, K>[] {
+    return Array.from(this._log).map(
+      (prop) => [prop, source.getProperty(prop)] as TKeyValuePair<T, K>
     );
-
-    return result;
-  }
-
-  isPropertyChanged(property: K): boolean {
-    return this._log.has(property);
   }
 
   clear() {
