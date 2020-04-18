@@ -1,56 +1,44 @@
-import {
-  IGetProperty,
-  TKeyValuePair,
-  IChangeObject,
-} from "../serialize.interface";
+import { IChangeObject, IBaseSerializable } from "../serialize.interface";
+import { IObjectChanges } from "./serializable-object.interface";
+import { toSerializableValue } from "../utils/serialize-utils";
 
 export class ObjectChanges<T, K extends keyof T> implements IChangeObject {
   private _log = new Set<K>();
-  
-  private _disabled = false;
 
-  get disabled() {
-    return this._disabled;
-  }
+  private _allPropertiesChanged = false;
 
-  get hasEntries() {
-    return this._log.size > 0;
-  }
-
-  enable(): void {
-    if (!this._disabled) {
-      return;
-    }
-
-    this._disabled = false;
-  }
-
-  disable(): void {
-    if (this._disabled) {
-      return;
-    }
-
-    this._disabled = true;
-    this.clear();
+  setAllPropertiesChanged(): void {
+    this._allPropertiesChanged = true;
   }
 
   setPropertyChanged(prop: K, value: T[K]) {
-    if (this._disabled) {
+    if (this._allPropertiesChanged) {
       return;
     }
 
     this._log.add(prop);
   }
 
-  getChanges(source: IGetProperty<T, K>): TKeyValuePair<T, K>[] {
-    return Array.from(this._log).map(
-      (prop) => [prop, source.getProperty(prop)] as TKeyValuePair<T, K>
-    );
-  }
-
-  clear() {
-    if (this._log.size > 0) {
-      this._log.clear();
+  getChanges(source: IBaseSerializable<T, K>): IObjectChanges | undefined {
+    if (!this._log.size) {
+      return undefined;
     }
+
+    const log = Array.from(this._log).map((prop) => {
+      const value = toSerializableValue(source.getProperty(prop));
+      const property = prop as string;
+
+      return {
+        operation: "update",
+        property,
+        value,
+      };
+    });
+
+    return {
+      id: source.id,
+      className: source.getClassName(),
+      log,
+    };
   }
 }

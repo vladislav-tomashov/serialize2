@@ -12,7 +12,7 @@ import {
   TCollectionSetChange,
 } from "./changable-collections.interface";
 import { ISerializableState, ISerializable } from "../serialize.interface";
-import { getId } from "../../utils/id-utils";
+import { getId } from "../utils/id-utils";
 import { getContext } from "../../context/context";
 import { System } from "../../system/System";
 

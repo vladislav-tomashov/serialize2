@@ -1,22 +1,16 @@
-import { getId } from "../../utils/id-utils";
-import {
-  ISerializableState,
-  ISerializable,
-  IGetProperty,
-  ISetProperty,
-  TKeyValuePair,
-} from "../serialize.interface";
+import { getId } from "../utils/id-utils";
+import { IBaseSerializable } from "../serialize.interface";
 import { getContext } from "../../context/context";
 import { ObjectChanges } from "./ObjectChanges";
 import { System } from "../../system/System";
+import { IBaseState, IObjectChanges } from "./serializable-object.interface";
+import { fromSerializableValue } from "../utils/serialize-utils";
 
-export class BaseSerializable<T extends ISerializableState, K extends keyof T>
-  implements ISerializable<T, K>, IGetProperty<T, K>, ISetProperty<T, K> {
+export class BaseSerializable<T extends IBaseState, K extends keyof T>
+  implements IBaseSerializable<T, K> {
   private _id = getId();
 
-  protected _state: T = {
-    className: this.getClassName(),
-  } as T;
+  protected _state: T = {} as T;
 
   // Interface ISerializable
   serializable: true = true;
@@ -25,24 +19,25 @@ export class BaseSerializable<T extends ISerializableState, K extends keyof T>
     return this._id;
   }
 
-  applyChanges(changes: TKeyValuePair<T, K>[]) {
-    changes.forEach(([key, value]) => {
-      this._state[key] = value;
-    });
-  }
-
-  getState(): T {
-    return this._state;
-  }
-
-  setState(state: T): void {
-    if (this._state.className !== state.className) {
+  applyChanges(changes: IObjectChanges): void {
+    if (changes.className !== this.getClassName()) {
       throw new Error(
-        `BaseSerializable.setState(): incoming state className="${state.className}" differs from current className="${this._state.className}"`
+        `Cannot applyChanges, because changes have different className: "${changes.className}" !== "this.getClassName()"`
       );
     }
 
-    this._state = state;
+    this._id = changes.id;
+
+    changes.log.forEach((change) => {
+      const { operation, value, property } = change;
+
+      if (operation !== "update") {
+        throw new Error(`Uknown operation "${operation}"`);
+      }
+
+      const newValue = (fromSerializableValue(value) as unknown) as T[K];
+      this._state[property as K] = newValue;
+    });
   }
 
   getClassName(): string {

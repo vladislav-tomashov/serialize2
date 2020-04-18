@@ -1,33 +1,16 @@
-import { TCollectionChange } from "./serializable-collections/changable-collections.interface";
-
-export interface ISerializableState {
-  readonly className: string;
-  [key: string]: any;
-}
-
-export interface ISerializable<
-  T extends ISerializableState,
-  K extends keyof T
-> {
+export interface ISerializable {
   serializable: true;
   readonly id: string;
   getClassName: () => string;
-  getState: () => T;
-  setState: (state: T) => void;
-  applyChanges(changes: TKeyValuePair<T, K>[]): void;
+  applyChanges(changes: IChanges): void;
 }
 
-export function isSerializable<T extends ISerializableState, K extends keyof T>(
-  value: any
-): value is ISerializable<T, K> {
+export function isSerializable(value: any): value is ISerializable {
   return typeof value === "object" && !!value.serializable;
 }
 
-export interface ISerializableClass<
-  T extends ISerializableState,
-  K extends keyof T
-> {
-  prototype: ISerializable<T, K>;
+export interface ISerializableClass {
+  prototype: ISerializable;
 }
 
 export type TKeyValuePair<T, K extends keyof T> = [K, T[K]];
@@ -40,13 +23,36 @@ export interface ISetProperty<T, K extends keyof T> {
   setProperty(prop: K, value: T[K]): void;
 }
 
-export type TChanges = TKeyValuePair<any, any>[] | TCollectionChange<any>[];
-
 export interface IChangeObject {
-  readonly disabled: boolean;
-  readonly hasEntries: boolean;
-  disable(): void;
-  enable(): void;
-  clear(): void;
-  getChanges(source: any): TChanges;
+  getChanges(source: ISerializable): IChanges | undefined;
+  setAllPropertiesChanged(): void;
 }
+
+export interface IChanges {
+  id: string;
+  className: string;
+  log: IChange[];
+}
+
+export interface IChange {
+  operation: string;
+  [key: string]: any;
+}
+
+export enum ValueType {
+  primitive,
+  ref,
+}
+
+export type TPrimitiveType = number | string | undefined | null | boolean;
+
+export type TPrimitiveValue = [ValueType.primitive, TPrimitiveType];
+
+export type TRefValue = [ValueType.ref, string];
+
+export type TSerializableValue = TPrimitiveValue | TRefValue;
+
+export interface IBaseSerializable<T, K extends keyof T>
+  extends ISerializable,
+    IGetProperty<T, K>,
+    ISetProperty<T, K> {}

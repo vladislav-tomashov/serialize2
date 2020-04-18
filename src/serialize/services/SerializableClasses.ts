@@ -1,13 +1,11 @@
 import { ISerializableClass } from "../serialize.interface";
 
 export class SerializableClasses {
-  private _classes: { [key: string]: ISerializableClass<any, any> } = {};
+  private _classes: { [key: string]: ISerializableClass } = {};
 
-  addClass(className: string, classObject: ISerializableClass<any, any>): void {
+  addClass(className: string, classObject: ISerializableClass): void {
     if (this._classes[className] !== undefined) {
-      throw new Error(
-        `SerializeService.registerSerializableClass(): Class with name "${className}" is already registered`
-      );
+      throw new Error(`Class with name "${className}" is already added.`);
     }
 
     this._classes[className] = classObject;
