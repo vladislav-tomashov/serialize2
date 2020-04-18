@@ -37,7 +37,7 @@ const fromSerializedValue = (
     return value;
   }
 
-  const { objects } = getContext() as System;
+  const { objects } = getContext();
   const obj = objects.getObject(value as string);
 
   if (!obj) {

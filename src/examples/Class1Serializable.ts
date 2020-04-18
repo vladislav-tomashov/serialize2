@@ -1,9 +1,9 @@
 import { IClass1 } from "./IClass1";
 import { ChangableArrayCollection } from "../serialize/serializable-collections/ChangableArrayCollection";
 import { BaseSerializable } from "../serialize/serializable-object/BaseSerializable";
-import { ISerializableState } from "../serialize/serialize.interface";
+import { IBaseState } from "../serialize/serializable-object/serializable-object.interface";
 
-export interface IClass1State extends ISerializableState {
+export interface IClass1State extends IBaseState {
   _prop1: string;
   _prop2: number;
   prop3: string;
@@ -42,35 +42,35 @@ export class Class1Serializable
 
   // Proxied state properties
   private get _prop1() {
-    return this._state.getProperty("_prop1") as string;
+    return this.getProperty("_prop1") as string;
   }
 
   private set _prop1(value: string) {
-    this._state.setProperty("_prop1", value);
+    this._setProperty("_prop1", value);
   }
 
   protected get _prop2() {
-    return this._state.getProperty("_prop2") as number;
+    return this.getProperty("_prop2") as number;
   }
 
   protected set _prop2(value: number) {
-    this._state.setProperty("_prop2", value);
+    this._setProperty("_prop2", value);
   }
 
   get prop3() {
-    return this._state.getProperty("prop3") as string;
+    return this.getProperty("prop3") as string;
   }
 
   set prop3(value: string) {
-    this._state.setProperty("prop3", value);
+    this._setProperty("prop3", value);
   }
 
   private get _arr() {
-    return this._state.getProperty("_arr") as ChangableArrayCollection<number>;
+    return this.getProperty("_arr") as ChangableArrayCollection<number>;
   }
 
   private set _arr(value: ChangableArrayCollection<number>) {
-    this._state.setProperty("_arr", value);
+    this._setProperty("_arr", value);
   }
 
   // copied Class1 methods

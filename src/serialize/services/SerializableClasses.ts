@@ -1,6 +1,7 @@
 import { ISerializableClass } from "../serialize.interface";
+import { ISerializableClasses } from "./services.interface";
 
-export class SerializableClasses {
+export class SerializableClasses implements ISerializableClasses {
   private _classes: { [key: string]: ISerializableClass } = {};
 
   addClass(className: string, classObject: ISerializableClass): void {
@@ -15,7 +16,7 @@ export class SerializableClasses {
     delete this._classes[className];
   }
 
-  clear() {
+  clear(): void {
     this._classes = {};
   }
 }

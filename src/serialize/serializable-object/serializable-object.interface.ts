@@ -4,7 +4,6 @@ import {
   IChanges,
   ISerializable,
   IGetProperty,
-  ISetProperty,
 } from "../serialize.interface";
 
 export interface IBaseState {}
@@ -20,5 +19,4 @@ export interface IObjectChanges extends IChanges {
 
 export interface IBaseSerializable<T, K extends keyof T>
   extends ISerializable,
-    IGetProperty<T, K>,
-    ISetProperty<T, K> {}
+    IGetProperty<T, K> {}

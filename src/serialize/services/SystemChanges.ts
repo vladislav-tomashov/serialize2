@@ -6,7 +6,7 @@ export class SystemChanges {
   private _changes = new Map<ISerializable, IChangeObject>();
 
   setChangeObject(key: ISerializable, changeObject: IChangeObject): void {
-    const { objects } = getContext() as System;
+    const { objects } = getContext();
 
     if (!objects.hasObject(key)) {
       changeObject.setAllPropertiesChanged();

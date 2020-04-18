@@ -46,20 +46,6 @@ export class ChangableArrayCollection<T> extends ArrayCollection<T>
     return this.constructor.name;
   }
 
-  protected _getChangeObject(): ArrayCollectionChanges<T> {
-    const { changes } = getContext() as System;
-    const result = changes.getChangeObject(this) as ArrayCollectionChanges<T>;
-
-    if (result) {
-      return result;
-    }
-
-    const newChanges = new ArrayCollectionChanges<T>();
-    changes.setChangeObject(this, newChanges);
-
-    return newChanges;
-  }
-
   // redefine some methods from parent
   set(index: number, value: T): void {
     super.set(index, value);
@@ -118,6 +104,20 @@ export class ChangableArrayCollection<T> extends ArrayCollection<T>
   }
 
   // private and protected
+  protected _getChangeObject(): ArrayCollectionChanges<T> {
+    const { changes } = getContext();
+    const result = changes.getChangeObject(this) as ArrayCollectionChanges<T>;
+
+    if (result) {
+      return result;
+    }
+
+    const newChanges = new ArrayCollectionChanges<T>();
+    changes.setChangeObject(this, newChanges);
+
+    return newChanges;
+  }
+
   protected _applyChange(change: ICollectionChange): void {
     const { operation, data } = change;
 

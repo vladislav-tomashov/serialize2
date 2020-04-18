@@ -56,15 +56,14 @@ export class BaseSerializable<T extends IBaseState, K extends keyof T>
     return this._state;
   }
 
-  // Interface ISetProperty
-  setProperty(prop: K, value: T[K]): void {
+  // protected and private
+  protected _setProperty(prop: K, value: T[K]): void {
     this._state[prop] = value;
     this._getChangeObject().setPropertyChanged(prop, value);
   }
 
-  // protected and private
   protected _getChangeObject(): ObjectChanges<T, K> {
-    const { changes } = getContext() as System;
+    const { changes } = getContext();
     const result = changes.getChangeObject(this) as ObjectChanges<T, K>;
 
     if (result) {
