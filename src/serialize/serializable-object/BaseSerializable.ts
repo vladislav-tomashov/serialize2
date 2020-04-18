@@ -1,7 +1,6 @@
 import { getId } from "../utils/id-utils";
 import { getContext } from "../../context/context";
 import { ObjectChanges } from "./ObjectChanges";
-import { System } from "../../system/System";
 import {
   IBaseState,
   IObjectChanges,
@@ -14,6 +13,14 @@ export class BaseSerializable<T extends IBaseState, K extends keyof T>
   private _id = getId();
 
   protected _state: T = {} as T;
+
+  constructor() {
+    const { changes } = getContext();
+    const changeObj = new ObjectChanges<T, K>();
+
+    changeObj.setAllPropertiesChanged();
+    changes.setChangeObject(this, changeObj);
+  }
 
   // Interface ISerializable
   serializable: true = true;
@@ -64,15 +71,18 @@ export class BaseSerializable<T extends IBaseState, K extends keyof T>
 
   protected _getChangeObject(): ObjectChanges<T, K> {
     const { changes } = getContext();
-    const result = changes.getChangeObject(this) as ObjectChanges<T, K>;
+    const existingChageObj = changes.getChangeObject(this) as ObjectChanges<
+      T,
+      K
+    >;
 
-    if (result) {
-      return result;
+    if (existingChageObj) {
+      return existingChageObj;
     }
 
-    const newChanges = new ObjectChanges<T, K>();
-    changes.setChangeObject(this, newChanges);
+    const newChangeObj = new ObjectChanges<T, K>();
+    changes.setChangeObject(this, newChangeObj);
 
-    return newChanges;
+    return newChangeObj;
   }
 }

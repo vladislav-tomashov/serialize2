@@ -44,11 +44,13 @@ function getChange<T>(
   switch (changeType) {
     case CollectionChangeType.Push: {
       const typedChange = change as TPushChange<T>;
-      return typedChange[1].map((x) => toSerializedValue(x));
+      const [, items] = typedChange;
+      return items.map((x) => toSerializedValue(x));
     }
     case CollectionChangeType.Unshift: {
       const typedChange = change as TUnshiftChange<T>;
-      return typedChange[1].map((x) => toSerializedValue(x));
+      const [, items] = typedChange;
+      return items.map((x) => toSerializedValue(x));
     }
     case CollectionChangeType.Pop: {
       return undefined;

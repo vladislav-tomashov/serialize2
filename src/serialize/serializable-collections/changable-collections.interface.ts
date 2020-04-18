@@ -3,6 +3,7 @@ import {
   IChange,
   TSerializableValue,
   ISerializable,
+  IGetProperty,
 } from "../serialize.interface";
 import { IArrayCollection } from "../../collections/collections.interface";
 
@@ -46,4 +47,5 @@ export interface ICollectionChanges extends IChanges {
 
 export interface IChangableArrayCollection<T>
   extends ISerializable,
+    IGetProperty<T[], number>,
     IArrayCollection<T> {}

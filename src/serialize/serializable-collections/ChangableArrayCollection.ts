@@ -13,13 +13,22 @@ import {
 } from "./changable-collections.interface";
 import { getId } from "../utils/id-utils";
 import { getContext } from "../../context/context";
-import { System } from "../../system/System";
 import { TSerializableValue } from "../serialize.interface";
 import { fromSerializedValue } from "../utils/serialize-utils";
 
 export class ChangableArrayCollection<T> extends ArrayCollection<T>
   implements IChangableArrayCollection<T> {
   private _id = getId();
+
+  constructor(value: any) {
+    super(value);
+
+    const { changes } = getContext();
+    const changeObj = new ArrayCollectionChanges<T>();
+
+    changeObj.setAllPropertiesChanged();
+    changes.setChangeObject(this, changeObj);
+  }
 
   // Interface ISerializable
   serializable: true = true;
@@ -44,6 +53,15 @@ export class ChangableArrayCollection<T> extends ArrayCollection<T>
 
   getClassName(): string {
     return this.constructor.name;
+  }
+
+  // interface IGetProperty
+  getProperty(prop: number): T {
+    return this._array[prop];
+  }
+
+  getAllProperties(): T[] {
+    return this._array;
   }
 
   // redefine some methods from parent
@@ -106,16 +124,18 @@ export class ChangableArrayCollection<T> extends ArrayCollection<T>
   // private and protected
   protected _getChangeObject(): ArrayCollectionChanges<T> {
     const { changes } = getContext();
-    const result = changes.getChangeObject(this) as ArrayCollectionChanges<T>;
+    const existingChageObj = changes.getChangeObject(
+      this
+    ) as ArrayCollectionChanges<T>;
 
-    if (result) {
-      return result;
+    if (existingChageObj) {
+      return existingChageObj;
     }
 
-    const newChanges = new ArrayCollectionChanges<T>();
-    changes.setChangeObject(this, newChanges);
+    const newChangeObj = new ArrayCollectionChanges<T>();
+    changes.setChangeObject(this, newChangeObj);
 
-    return newChanges;
+    return newChangeObj;
   }
 
   protected _applyChange(change: ICollectionChange): void {
