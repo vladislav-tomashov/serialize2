@@ -1,8 +1,8 @@
-import { ISerializable, IChangeObject } from "../serialize.interface";
+import { ISerializable, IChangeObject, IChanges } from "../serialize.interface";
 import { getContext } from "../../context/context";
-import { System } from "../../system/System";
+import { ISystemChanges } from "./services.interface";
 
-export class SystemChanges {
+export class SystemChanges implements ISystemChanges {
   private _changes = new Map<ISerializable, IChangeObject>();
 
   setChangeObject(key: ISerializable, changeObject: IChangeObject): void {
@@ -21,5 +21,19 @@ export class SystemChanges {
 
   clear(): void {
     this._changes.clear();
+  }
+
+  getChanges(): IChanges[] {
+    const result: IChanges[] = [];
+
+    this._changes.forEach((changeObject, source) => {
+      const objChanges = changeObject.getChanges(source);
+
+      if (objChanges) {
+        result.push(objChanges);
+      }
+    });
+
+    return result;
   }
 }

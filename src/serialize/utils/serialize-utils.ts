@@ -6,7 +6,6 @@ import {
   TPrimitiveType,
 } from "../serialize.interface";
 import { getContext } from "../../context/context";
-import { System } from "../../system/System";
 
 const toSerializedValue = (value: any): TSerializableValue | never => {
   if (isSerializable(value)) {
@@ -22,7 +21,7 @@ const toSerializedValue = (value: any): TSerializableValue | never => {
     typeOfValue === "boolean" ||
     typeOfValue === "undefined"
   ) {
-    return [ValueType.reference, value];
+    return [ValueType.primitive, value];
   }
 
   throw new Error(`Value cannot be converted to TSerializableValue "${value}"`);

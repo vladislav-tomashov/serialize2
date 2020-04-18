@@ -41,8 +41,8 @@ export interface IChange {
 }
 
 export enum ValueType {
-  primitive,
-  reference,
+  primitive = "primitive",
+  reference = "reference",
 }
 
 export type TPrimitiveType = number | string | undefined | null | boolean;
@@ -52,4 +52,3 @@ export type TPrimitiveValue = [ValueType.primitive, TPrimitiveType];
 export type TRefValue = [ValueType.reference, string];
 
 export type TSerializableValue = TPrimitiveValue | TRefValue;
-

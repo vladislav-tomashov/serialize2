@@ -2,6 +2,7 @@ import {
   ISerializableClass,
   ISerializable,
   IChangeObject,
+  IChanges,
 } from "../serialize.interface";
 
 export interface ISerializableClasses {
@@ -32,6 +33,8 @@ export interface ISystemChanges {
   setChangeObject(key: ISerializable, changeObject: IChangeObject): void;
 
   getChangeObject(key: ISerializable): IChangeObject | undefined;
+
+  getChanges(): IChanges[];
 
   clear(): void;
 }
