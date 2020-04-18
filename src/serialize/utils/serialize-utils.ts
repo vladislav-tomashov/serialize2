@@ -8,9 +8,9 @@ import {
 import { getContext } from "../../context/context";
 import { System } from "../../system/System";
 
-const toSerializableValue = (value: any): TSerializableValue | never => {
+const toSerializedValue = (value: any): TSerializableValue | never => {
   if (isSerializable(value)) {
-    return [ValueType.ref, value.id];
+    return [ValueType.reference, value.id];
   }
 
   const typeOfValue = typeof value;
@@ -22,13 +22,13 @@ const toSerializableValue = (value: any): TSerializableValue | never => {
     typeOfValue === "boolean" ||
     typeOfValue === "undefined"
   ) {
-    return [ValueType.ref, value];
+    return [ValueType.reference, value];
   }
 
   throw new Error(`Value cannot be converted to TSerializableValue "${value}"`);
 };
 
-const fromSerializableValue = (
+const fromSerializedValue = (
   serializableValue: TSerializableValue
 ): TPrimitiveType | ISerializable | never => {
   const [valueType, value] = serializableValue;
@@ -47,4 +47,4 @@ const fromSerializableValue = (
   return obj;
 };
 
-export { toSerializableValue, fromSerializableValue };
+export { toSerializedValue, fromSerializedValue };

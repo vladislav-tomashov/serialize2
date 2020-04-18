@@ -17,6 +17,7 @@ export type TKeyValuePair<T, K extends keyof T> = [K, T[K]];
 
 export interface IGetProperty<T, K extends keyof T> {
   getProperty(prop: K): T[K];
+  getAllProperties(): T;
 }
 
 export interface ISetProperty<T, K extends keyof T> {
@@ -41,18 +42,14 @@ export interface IChange {
 
 export enum ValueType {
   primitive,
-  ref,
+  reference,
 }
 
 export type TPrimitiveType = number | string | undefined | null | boolean;
 
 export type TPrimitiveValue = [ValueType.primitive, TPrimitiveType];
 
-export type TRefValue = [ValueType.ref, string];
+export type TRefValue = [ValueType.reference, string];
 
 export type TSerializableValue = TPrimitiveValue | TRefValue;
 
-export interface IBaseSerializable<T, K extends keyof T>
-  extends ISerializable,
-    IGetProperty<T, K>,
-    ISetProperty<T, K> {}

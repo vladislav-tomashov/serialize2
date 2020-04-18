@@ -1,17 +1,11 @@
 import {
   TCollectionChange,
   CollectionChangeType,
-  TCollectionPushChange,
-  TCollectionPopChange,
-  TCollectionClearChange,
-  TCollectionSortChange,
-  TCollectionReverseChange,
-  TCollectionSetChange,
-  TCollectionUnshiftChange,
-  TCollectionShiftChange,
-  TCollectionSpliceChange,
+  ICollectionChanges,
+  IChangableArrayCollection,
 } from "./changable-collections.interface";
-import { IChangeObject } from "../serialize.interface";
+import { IChangeObject, TSerializableValue } from "../serialize.interface";
+import { toSerializedValue } from "../utils/serialize-utils";
 
 type TPushChange<T> = [CollectionChangeType.Push, T[]];
 
@@ -21,11 +15,7 @@ type TPopChange = [CollectionChangeType.Pop];
 
 type TShiftChange = [CollectionChangeType.Shift];
 
-type TClearChange = [CollectionChangeType.Clear];
-
-type TSortChange = [CollectionChangeType.Sort];
-
-type TReverseChange = [CollectionChangeType.Reverse];
+type TAllChange = [CollectionChangeType.All];
 
 type TSetChange<T> = [CollectionChangeType.Set, number, T];
 
@@ -39,38 +29,49 @@ type TSpliceChange<T> = [
 type TChange<T> =
   | TPushChange<T>
   | TPopChange
-  | TClearChange
-  | TSortChange
-  | TReverseChange
+  | TAllChange
   | TSetChange<T>
   | TUnshiftChange<T>
   | TShiftChange
   | TSpliceChange<T>;
 
-function getChange<T>(change: TChange<T>, source: T[]): TCollectionChange<T> {
+function getChange<T>(
+  change: TChange<T>,
+  source: IChangableArrayCollection<T>
+): TCollectionChange<TSerializableValue> | undefined | never {
   const [changeType] = change;
 
   switch (changeType) {
-    case CollectionChangeType.Push:
-      return change as TCollectionPushChange<T>;
-    case CollectionChangeType.Unshift:
-      return change as TCollectionUnshiftChange<T>;
-    case CollectionChangeType.Pop:
-      return change as TCollectionPopChange;
-    case CollectionChangeType.Shift:
-      return change as TCollectionShiftChange;
-    case CollectionChangeType.Clear:
-      return [CollectionChangeType.Clear, source] as TCollectionClearChange<T>;
-    case CollectionChangeType.Sort:
-      return [CollectionChangeType.Sort, source] as TCollectionSortChange<T>;
-    case CollectionChangeType.Reverse:
-      return [CollectionChangeType.Reverse, source] as TCollectionReverseChange<
-        T
-      >;
-    case CollectionChangeType.Set:
-      return change as TCollectionSetChange<T>;
-    case CollectionChangeType.Splice:
-      return change as TCollectionSpliceChange<T>;
+    case CollectionChangeType.Push: {
+      const typedChange = change as TPushChange<T>;
+      return typedChange[1].map((x) => toSerializedValue(x));
+    }
+    case CollectionChangeType.Unshift: {
+      const typedChange = change as TUnshiftChange<T>;
+      return typedChange[1].map((x) => toSerializedValue(x));
+    }
+    case CollectionChangeType.Pop: {
+      return undefined;
+    }
+    case CollectionChangeType.Shift: {
+      return undefined;
+    }
+    case CollectionChangeType.All: {
+      return source.toArray().map((x) => toSerializedValue(x));
+    }
+    case CollectionChangeType.Set: {
+      const typedChange = change as TSetChange<T>;
+      const [, index, value] = typedChange;
+      return [index, toSerializedValue(value)];
+    }
+    case CollectionChangeType.Splice: {
+      const typedChange = change as TSpliceChange<T>;
+      const [, start, deleteCount, items] = typedChange;
+      const serializedItems = items
+        ? items.map((x) => toSerializedValue(x))
+        : undefined;
+      return [start, deleteCount, serializedItems];
+    }
     default:
       throw new Error(`Unknown array change type=${changeType}`);
   }
@@ -79,37 +80,14 @@ function getChange<T>(change: TChange<T>, source: T[]): TCollectionChange<T> {
 export class ArrayCollectionChanges<T> implements IChangeObject {
   private _log: Array<TChange<T>> = [];
 
-  private _allItemsChanged = false;
+  private _allPropertiesChanged = false;
 
-  private _disabled = false;
-
-  get disabled(): boolean {
-    return this._disabled;
-  }
-
-  disable(): void {
-    if (this._disabled) {
-      return;
-    }
-
-    this._disabled = true;
-    this.clear();
-  }
-
-  enable(): void {
-    if (!this._disabled) {
-      return;
-    }
-
-    this._disabled = false;
-  }
-
-  get hasEntries() {
-    return this._log.length > 0;
+  setAllPropertiesChanged(): void {
+    this._allPropertiesChanged = true;
   }
 
   registerSplice(start: number, deleteCount: number, items: T[]) {
-    if (this._allItemsChanged || this._disabled) {
+    if (this._allPropertiesChanged) {
       return;
     }
 
@@ -124,7 +102,7 @@ export class ArrayCollectionChanges<T> implements IChangeObject {
   }
 
   registerSet(index: number, value: T) {
-    if (this._allItemsChanged || this._disabled) {
+    if (this._allPropertiesChanged) {
       return;
     }
 
@@ -133,7 +111,7 @@ export class ArrayCollectionChanges<T> implements IChangeObject {
   }
 
   registerPop() {
-    if (this._allItemsChanged || this._disabled) {
+    if (this._allPropertiesChanged) {
       return;
     }
 
@@ -142,7 +120,7 @@ export class ArrayCollectionChanges<T> implements IChangeObject {
   }
 
   registerShift() {
-    if (this._allItemsChanged || this._disabled) {
+    if (this._allPropertiesChanged) {
       return;
     }
 
@@ -151,40 +129,34 @@ export class ArrayCollectionChanges<T> implements IChangeObject {
   }
 
   registerClear() {
-    if (this._allItemsChanged || this._disabled) {
+    if (this._allPropertiesChanged) {
       return;
     }
 
-    const change = [CollectionChangeType.Clear] as TClearChange;
     this._log = [];
-    this._log.push(change);
-    this._allItemsChanged = true;
+    this._allPropertiesChanged = true;
   }
 
   registerSort() {
-    if (this._allItemsChanged || this._disabled) {
+    if (this._allPropertiesChanged) {
       return;
     }
 
-    const change = [CollectionChangeType.Sort] as TSortChange;
     this._log = [];
-    this._log.push(change);
-    this._allItemsChanged = true;
+    this._allPropertiesChanged = true;
   }
 
   registerReverse() {
-    if (this._allItemsChanged || this._disabled) {
+    if (this._allPropertiesChanged) {
       return;
     }
 
-    const change = [CollectionChangeType.Reverse] as TReverseChange;
     this._log = [];
-    this._log.push(change);
-    this._allItemsChanged = true;
+    this._allPropertiesChanged = true;
   }
 
   registerPush(items: T[]) {
-    if (this._allItemsChanged || this._disabled) {
+    if (this._allPropertiesChanged) {
       return;
     }
 
@@ -193,7 +165,7 @@ export class ArrayCollectionChanges<T> implements IChangeObject {
   }
 
   registerUnshift(items: T[]) {
-    if (this._allItemsChanged || this._disabled) {
+    if (this._allPropertiesChanged) {
       return;
     }
 
@@ -201,17 +173,32 @@ export class ArrayCollectionChanges<T> implements IChangeObject {
     this._log.push(change);
   }
 
-  getChanges(source: T[]): TCollectionChange<T>[] {
-    return this._log.map((x) => getChange(x, source));
-  }
+  getChanges(
+    source: IChangableArrayCollection<T>
+  ): ICollectionChanges | undefined {
+    const id = source.id;
+    const className = source.getClassName();
 
-  clear() {
-    if (this._log.length > 0) {
-      this._log = [];
+    if (this._allPropertiesChanged) {
+      const operation = CollectionChangeType.All;
+      const change: TAllChange = [operation];
+      const log = [change].map((x) => ({
+        operation,
+        data: getChange(x, source),
+      }));
+
+      return { id, className, log };
     }
 
-    if (this._allItemsChanged) {
-      this._allItemsChanged = false;
+    if (!this._log.length) {
+      return undefined;
     }
+
+    const log = this._log.map((change) => ({
+      operation: change[0],
+      data: getChange(change, source),
+    }));
+
+    return { id, className, log };
   }
 }

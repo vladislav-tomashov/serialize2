@@ -1,45 +1,49 @@
+import {
+  IChanges,
+  IChange,
+  TSerializableValue,
+  ISerializable,
+} from "../serialize.interface";
+import { IArrayCollection } from "../../collections/collections.interface";
+
 export enum CollectionChangeType {
-  Push,
-  Pop,
-  Clear,
-  Sort,
-  Reverse,
-  Splice,
-  Set,
-  Shift,
-  Unshift,
+  Push = "Push",
+  Pop = "Pop",
+  Splice = "Splice",
+  Set = "Set",
+  Shift = "Shift",
+  Unshift = "Unshift",
+  All = "All",
 }
 
-export type TCollectionPushChange<T> = [CollectionChangeType.Push, T[]];
+export type TCollectionPushChange<T> = T[];
 
-export type TCollectionPopChange = [CollectionChangeType.Pop];
+export type TCollectionAllChange<T> = T[];
 
-export type TCollectionClearChange<T> = [CollectionChangeType.Clear, T[]];
+export type TCollectionSetChange<T> = [number, T];
 
-export type TCollectionSortChange<T> = [CollectionChangeType.Sort, T[]];
-
-export type TCollectionReverseChange<T> = [CollectionChangeType.Reverse, T[]];
-
-export type TCollectionSetChange<T> = [CollectionChangeType.Set, number, T];
-
-export type TCollectionUnshiftChange<T> = [CollectionChangeType.Unshift, T[]];
-
-export type TCollectionShiftChange = [CollectionChangeType.Shift];
+export type TCollectionUnshiftChange<T> = T[];
 
 export type TCollectionSpliceChange<T> = [
-  CollectionChangeType.Splice,
   number,
   number | undefined,
-  T[] | undefined,
+  T[] | undefined
 ];
 
 export type TCollectionChange<T> =
   | TCollectionPushChange<T>
-  | TCollectionPopChange
-  | TCollectionClearChange<T>
-  | TCollectionSortChange<T>
-  | TCollectionReverseChange<T>
+  | TCollectionAllChange<T>
   | TCollectionSetChange<T>
   | TCollectionUnshiftChange<T>
-  | TCollectionShiftChange
   | TCollectionSpliceChange<T>;
+
+export interface ICollectionChange extends IChange {
+  data: TCollectionChange<TSerializableValue> | undefined;
+}
+export interface ICollectionChanges extends IChanges {
+  log: ICollectionChange[];
+}
+
+export interface IChangableArrayCollection<T>
+  extends ISerializable,
+    IArrayCollection<T> {}

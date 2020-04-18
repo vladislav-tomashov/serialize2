@@ -1,10 +1,13 @@
 import { getId } from "../utils/id-utils";
-import { IBaseSerializable } from "../serialize.interface";
 import { getContext } from "../../context/context";
 import { ObjectChanges } from "./ObjectChanges";
 import { System } from "../../system/System";
-import { IBaseState, IObjectChanges } from "./serializable-object.interface";
-import { fromSerializableValue } from "../utils/serialize-utils";
+import {
+  IBaseState,
+  IObjectChanges,
+  IBaseSerializable,
+} from "./serializable-object.interface";
+import { fromSerializedValue } from "../utils/serialize-utils";
 
 export class BaseSerializable<T extends IBaseState, K extends keyof T>
   implements IBaseSerializable<T, K> {
@@ -35,7 +38,7 @@ export class BaseSerializable<T extends IBaseState, K extends keyof T>
         throw new Error(`Uknown operation "${operation}"`);
       }
 
-      const newValue = (fromSerializableValue(value) as unknown) as T[K];
+      const newValue = (fromSerializedValue(value) as unknown) as T[K];
       this._state[property as K] = newValue;
     });
   }
@@ -47,6 +50,10 @@ export class BaseSerializable<T extends IBaseState, K extends keyof T>
   // Interface IGetProperty
   getProperty(prop: K): T[K] {
     return this._state[prop];
+  }
+
+  getAllProperties(): T {
+    return this._state;
   }
 
   // Interface ISetProperty

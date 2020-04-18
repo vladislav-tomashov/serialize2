@@ -1,33 +1,25 @@
 import { ArrayCollectionChanges } from "./ArrayCollectionChanges";
 import { ArrayCollection } from "../../collections/ArrayCollection";
 import {
-  TCollectionChange,
-  CollectionChangeType,
   TCollectionSpliceChange,
   TCollectionPushChange,
   TCollectionUnshiftChange,
-  TCollectionClearChange,
-  TCollectionSortChange,
-  TCollectionReverseChange,
+  TCollectionAllChange,
   TCollectionSetChange,
+  IChangableArrayCollection,
+  ICollectionChange,
+  CollectionChangeType,
+  ICollectionChanges,
 } from "./changable-collections.interface";
-import { ISerializableState, ISerializable } from "../serialize.interface";
 import { getId } from "../utils/id-utils";
 import { getContext } from "../../context/context";
 import { System } from "../../system/System";
-
-export interface IChangableArrayCollectionState<T> extends ISerializableState {
-  array: T[];
-}
+import { TSerializableValue } from "../serialize.interface";
+import { fromSerializedValue } from "../utils/serialize-utils";
 
 export class ChangableArrayCollection<T> extends ArrayCollection<T>
-  implements ISerializable<IChangableArrayCollectionState<T>, number> {
+  implements IChangableArrayCollection<T> {
   private _id = getId();
-
-  protected _state: IChangableArrayCollectionState<T> = {
-    className: this.getClassName(),
-    array: this._array,
-  };
 
   // Interface ISerializable
   serializable: true = true;
@@ -36,22 +28,18 @@ export class ChangableArrayCollection<T> extends ArrayCollection<T>
     return this._id;
   }
 
-  applyChanges(changes: TCollectionChange<T>[]) {
-    changes.forEach((change) => this._applyChange(change));
-  }
-
-  getState(): IChangableArrayCollectionState<T> {
-    return this._state;
-  }
-
-  setState(state: IChangableArrayCollectionState<T>): void {
-    if (this._state.className !== state.className) {
+  applyChanges(changes: ICollectionChanges): void {
+    if (changes.className !== this.getClassName()) {
       throw new Error(
-        `BaseSerializable.setState(): incoming state className="${state.className}" differs from current className="${this._state.className}"`
+        `Cannot applyChanges, because changes have different className: "${changes.className}" !== "this.getClassName()"`
       );
     }
 
-    this._state = state;
+    this._id = changes.id;
+
+    changes.log.forEach((change) => {
+      this._applyChange(change);
+    });
   }
 
   getClassName(): string {
@@ -130,29 +118,40 @@ export class ChangableArrayCollection<T> extends ArrayCollection<T>
   }
 
   // private and protected
-  protected _applyChange(change: TCollectionChange<T>) {
-    const [changeType] = change;
+  protected _applyChange(change: ICollectionChange): void {
+    const { operation, data } = change;
 
-    switch (changeType) {
+    switch (operation) {
       case CollectionChangeType.Splice: {
-        const [, start, deleteCount, items] = change as TCollectionSpliceChange<
-          T
+        const [start, deleteCount, items] = data as TCollectionSpliceChange<
+          TSerializableValue
         >;
-        if (deleteCount && items) {
-          super.splice(start, deleteCount, ...items);
+
+        const newItems = items
+          ? items.map((x) => (fromSerializedValue(x) as unknown) as T)
+          : undefined;
+
+        if (deleteCount && newItems) {
+          super.splice(start, deleteCount, ...newItems);
         } else {
           super.splice(start, deleteCount);
         }
         break;
       }
       case CollectionChangeType.Push: {
-        const [, items] = change as TCollectionPushChange<T>;
-        super.push(...items);
+        const items = data as TCollectionPushChange<TSerializableValue>;
+        const newItems = items.map(
+          (x) => (fromSerializedValue(x) as unknown) as T
+        );
+        super.push(...newItems);
         break;
       }
       case CollectionChangeType.Unshift: {
-        const [, items] = change as TCollectionUnshiftChange<T>;
-        super.unshift(...items);
+        const items = data as TCollectionUnshiftChange<TSerializableValue>;
+        const newItems = items.map(
+          (x) => (fromSerializedValue(x) as unknown) as T
+        );
+        super.unshift(...newItems);
         break;
       }
       case CollectionChangeType.Pop: {
@@ -163,31 +162,22 @@ export class ChangableArrayCollection<T> extends ArrayCollection<T>
         super.shift();
         break;
       }
-      case CollectionChangeType.Clear: {
-        const [, items] = change as TCollectionClearChange<T>;
-        super.clear();
-        super.push(...items);
-        break;
-      }
-      case CollectionChangeType.Sort: {
-        const [, items] = change as TCollectionSortChange<T>;
-        super.clear();
-        super.push(...items);
-        break;
-      }
-      case CollectionChangeType.Reverse: {
-        const [, items] = change as TCollectionReverseChange<T>;
-        super.clear();
-        super.push(...items);
+      case CollectionChangeType.All: {
+        const items = data as TCollectionAllChange<TSerializableValue>;
+        const newItems = items.map(
+          (x) => (fromSerializedValue(x) as unknown) as T
+        );
+        this._array = newItems;
         break;
       }
       case CollectionChangeType.Set: {
-        const [, index, value] = change as TCollectionSetChange<T>;
-        super.set(index, value);
+        const [index, value] = data as TCollectionSetChange<TSerializableValue>;
+        const newValue = (fromSerializedValue(value) as unknown) as T;
+        super.set(index, newValue);
         break;
       }
       default:
-        throw new Error(`Unknown array change type=${changeType}`);
+        throw new Error(`Unknown array change type=${operation}`);
     }
   }
 }
