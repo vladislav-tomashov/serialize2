@@ -5,6 +5,7 @@ import {
 } from "../serialize/services/services.interface";
 import { ISerializableExtended } from "../serialize/serialize.interface";
 import { SystemChangesTransferService } from "../serialize/services/SystemChangesTransferService";
+import { IChangableArrayCollection } from "../serialize/serializable-collections/changable-collections.interface";
 
 export interface ISystem {
   readonly classes: ISerializableClasses;
@@ -15,9 +16,7 @@ export interface ISystem {
 
   readonly transerService: SystemChangesTransferService;
 
-  setRoot(root: ISerializableExtended<any, any>): void;
-
-  getRoot(): ISerializableExtended<any, any> | undefined;
+  readonly root: IChangableArrayCollection<ISerializableExtended<any, any>>;
 
   updateObjectsTable(): void;
 

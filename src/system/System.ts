@@ -8,6 +8,8 @@ import {
 } from "../serialize/serialize.interface";
 import { treeToArray } from "../serialize/utils/tree-utils";
 import { SystemChangesTransferService } from "../serialize/services/SystemChangesTransferService";
+import { ChangableArrayCollection } from "../serialize/serializable-collections/ChangableArrayCollection";
+import { IChangableArrayCollection } from "../serialize/serializable-collections/changable-collections.interface";
 
 const getNodes = (node: IGetProperty<any, any>) =>
   Object.values(node.getAllProperties()).filter((x) => typeof x === "object");
@@ -21,7 +23,13 @@ export class System implements ISystem {
 
   private _transerService = new SystemChangesTransferService();
 
-  private _root: ISerializableExtended<any, any> | undefined;
+  private _root: IChangableArrayCollection<
+    ISerializableExtended<any, any>
+  > = new ChangableArrayCollection<ISerializableExtended<any, any>>([], this);
+
+  get root() {
+    return this._root;
+  }
 
   get transerService() {
     return this._transerService;
@@ -39,19 +47,7 @@ export class System implements ISystem {
     return this._objects;
   }
 
-  getRoot() {
-    return this._root;
-  }
-
-  setRoot(value: ISerializableExtended<any, any>) {
-    this._root = value;
-  }
-
   updateObjectsTable(): void {
-    if (!this._root) {
-      throw new Error("There is no root in the system. Call setRoot() first.");
-    }
-
     const objects = treeToArray(this._root, getNodes);
 
     this._changes.clear();
@@ -81,6 +77,6 @@ export class System implements ISystem {
     }
 
     this._changes.clear();
-    this._objects.createOrUpdateObjects(changes, this._classes);
+    this._objects.createOrUpdateObjects(changes, this);
   }
 }

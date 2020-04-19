@@ -8,7 +8,6 @@ import {
   ObjectChangeType,
 } from "./serializable-object.interface";
 import { fromSerializedValue } from "../utils/serialize-utils";
-import { ISystemChanges } from "../services/services.interface";
 
 export class BaseSerializable<T extends IBaseState, K extends keyof T>
   implements IBaseSerializable<T, K> {
@@ -16,24 +15,22 @@ export class BaseSerializable<T extends IBaseState, K extends keyof T>
 
   protected _state = {} as T;
 
-  constructor() {
+  constructor(private _context = getContext()) {
     const changeObj = this._createChangesObject();
     changeObj.setAllPropertiesChanged();
   }
 
   // Interface ISerializable
-  serializable: true = true;
+  get serializable(): true {
+    return true;
+  }
 
   get id(): string {
     return this._id;
   }
 
   applyChanges(changes: IObjectChanges): void {
-    // if (changes.className !== this.getClassName()) {
-    //   throw new Error(
-    //     `Cannot applyChanges, because changes have different className: "${changes.className}" !== "this.getClassName()"`
-    //   );
-    // }
+    const { objects } = this._context;
 
     if (!this._state) {
       this._state = {} as T;
@@ -46,7 +43,7 @@ export class BaseSerializable<T extends IBaseState, K extends keyof T>
         throw new Error(`Uknown operation "${operation}"`);
       }
 
-      const newValue = (fromSerializedValue(value) as unknown) as T[K];
+      const newValue = (fromSerializedValue(value, objects) as unknown) as T[K];
       this._state[property as K] = newValue;
     });
   }
@@ -70,9 +67,8 @@ export class BaseSerializable<T extends IBaseState, K extends keyof T>
     this._getChangeObject().setPropertyChanged(prop, value);
   }
 
-  protected _createChangesObject(
-    changes: ISystemChanges = getContext().changes
-  ): ObjectChanges<T, K> {
+  protected _createChangesObject(): ObjectChanges<T, K> {
+    const { changes } = this._context;
     const result = new ObjectChanges<T, K>();
 
     changes.setChangeObject(this, result);
@@ -80,11 +76,10 @@ export class BaseSerializable<T extends IBaseState, K extends keyof T>
     return result;
   }
 
-  protected _getChangeObject(
-    changes: ISystemChanges = getContext().changes
-  ): ObjectChanges<T, K> {
+  protected _getChangeObject(): ObjectChanges<T, K> {
+    const { changes } = this._context;
     const result = changes.getChangeObject(this) as ObjectChanges<T, K>;
 
-    return result ? result : this._createChangesObject(changes);
+    return result ? result : this._createChangesObject();
   }
 }

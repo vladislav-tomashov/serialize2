@@ -4,6 +4,7 @@ import {
   IChangeObject,
   IChanges,
 } from "../serialize.interface";
+import { ISystem } from "../../system/system.interface";
 
 export interface ISerializableClasses {
   addClass(className: string, classObject: ISerializableClass): void;
@@ -32,10 +33,7 @@ export interface ISerializableObjects {
 
   clear(): void;
 
-  createOrUpdateObjects(
-    changes: IChanges[],
-    classes: ISerializableClasses
-  ): ISerializable[];
+  createOrUpdateObjects(changes: IChanges[], context: ISystem): ISerializable[];
 }
 
 export interface ISystemChanges {

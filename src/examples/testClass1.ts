@@ -7,6 +7,15 @@ import { ChangableArrayCollection } from "../serialize/serializable-collections/
   console.log("");
   console.log("========== Class1Serializable tests ==========");
 
+  function replacer(key: string, value: any): any | undefined {
+    // Filtering out properties
+    if (key === "_context") {
+      return undefined;
+    }
+
+    return value;
+  }
+
   // Serialization
   const system1 = new System();
   setContext(system1);
@@ -19,7 +28,7 @@ import { ChangableArrayCollection } from "../serialize/serializable-collections/
 
   const a = new Class1Serializable(1, "a");
 
-  system1.setRoot(a);
+  system1.root.push(a);
 
   await system1.transferChanges(true);
 
@@ -37,11 +46,10 @@ import { ChangableArrayCollection } from "../serialize/serializable-collections/
   console.log("serialized changes", changesAsString);
 
   system2.receiveChanges(transferId, changesAsString);
-  console.log(JSON.stringify(system2.objects, undefined, 4));
+  console.log(JSON.stringify(system2.objects, replacer, 4));
 
   // Serialization
   const cloneA = system2.objects.getObjectOrThrow(a.id) as Class1Serializable;
-  system2.setRoot(cloneA);
   system2.updateObjectsTable();
 
   cloneA.func1();
@@ -57,7 +65,8 @@ import { ChangableArrayCollection } from "../serialize/serializable-collections/
   console.log("serialized changes2", changesAsString2);
 
   system1.receiveChanges(transferId2, changesAsString2);
-  console.log(JSON.stringify(system1.objects, undefined, 4));
+  console.log(JSON.stringify(system1.objects, replacer, 4));
 
+  console.log("========== end Class1Serializable tests ==========");
   console.log("");
 })();

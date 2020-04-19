@@ -3,10 +3,8 @@ import {
   isSerializable,
   IChanges,
 } from "../serialize.interface";
-import {
-  ISerializableObjects,
-  ISerializableClasses,
-} from "./services.interface";
+import { ISerializableObjects } from "./services.interface";
+import { ISystem } from "../../system/system.interface";
 
 export class SerializableObjects implements ISerializableObjects {
   private _objects: { [key: string]: ISerializable } = {};
@@ -88,9 +86,9 @@ export class SerializableObjects implements ISerializableObjects {
 
   createOrUpdateObjects(
     changes: IChanges[],
-    classes: ISerializableClasses
+    context: ISystem
   ): ISerializable[] {
-    changes.forEach((x) => this._createObject(x, classes));
+    changes.forEach((x) => this._createObject(x, context));
 
     return changes.map((x) => this._updateObject(x));
   }
@@ -98,7 +96,7 @@ export class SerializableObjects implements ISerializableObjects {
   //private
   private _createObject(
     change: IChanges,
-    classes: ISerializableClasses
+    context: ISystem
   ): ISerializable | undefined {
     const { id, className } = change;
     const obj = this.getObject(id);
@@ -107,11 +105,13 @@ export class SerializableObjects implements ISerializableObjects {
       return undefined;
     }
 
+    const { classes } = context;
+
     const objClass = classes.getClassOrThrow(className);
     const newObj = Object.create(objClass.prototype);
 
-    newObj.serializable = true;
     newObj._id = id;
+    newObj._context = context;
 
     this.addObject(newObj);
 

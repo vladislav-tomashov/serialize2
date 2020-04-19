@@ -5,14 +5,14 @@ interface IToArray<T> {
 }
 
 class ArrayCollection<T> implements IArrayCollection<T> {
-  protected _array: Array<T> = [];
+  protected _array: Array<T>;
 
   constructor(value: Array<T>);
 
   constructor(value: IToArray<T>);
 
   constructor(value: any) {
-    const array = Array.isArray(value) ? value : value.toArray();
+    const array = Array.isArray(value) ? value : value ? value.toArray() : [];
     this._array = array;
   }
 
@@ -79,40 +79,40 @@ class ArrayCollection<T> implements IArrayCollection<T> {
 
   every(
     callbackfn: (value: T, index: number, array: T[]) => unknown,
-    thisArg?: any,
+    thisArg?: any
   ): boolean {
     return this._array.every(callbackfn, thisArg);
   }
 
   some(
     callbackfn: (value: T, index: number, array: T[]) => unknown,
-    thisArg?: any,
+    thisArg?: any
   ): boolean {
     return this._array.some(callbackfn, thisArg);
   }
 
   forEach(
     callbackfn: (value: T, index: number, array: T[]) => void,
-    thisArg?: any,
+    thisArg?: any
   ): void {
     return this._array.forEach(callbackfn, thisArg);
   }
 
   map<U>(
     callbackfn: (value: T, index: number, array: T[]) => U,
-    thisArg?: any,
+    thisArg?: any
   ): U[] {
     return this._array.map(callbackfn, thisArg);
   }
 
   filter<S extends T>(
     callbackfn: (value: T, index: number, array: T[]) => value is S,
-    thisArg?: any,
+    thisArg?: any
   ): S[];
 
   filter(
     callbackfn: (value: T, index: number, array: T[]) => unknown,
-    thisArg?: any,
+    thisArg?: any
   ): T[];
 
   filter(callbackfn: any, thisArg?: any) {
@@ -124,8 +124,8 @@ class ArrayCollection<T> implements IArrayCollection<T> {
       previousValue: T,
       currentValue: T,
       currentIndex: number,
-      array: T[],
-    ) => T,
+      array: T[]
+    ) => T
   ): T;
 
   reduce(
@@ -133,9 +133,9 @@ class ArrayCollection<T> implements IArrayCollection<T> {
       previousValue: T,
       currentValue: T,
       currentIndex: number,
-      array: T[],
+      array: T[]
     ) => T,
-    initialValue: T,
+    initialValue: T
   ): T;
 
   reduce<U>(
@@ -143,9 +143,9 @@ class ArrayCollection<T> implements IArrayCollection<T> {
       previousValue: U,
       currentValue: T,
       currentIndex: number,
-      array: T[],
+      array: T[]
     ) => U,
-    initialValue: U,
+    initialValue: U
   ): U;
 
   reduce(callbackfn: any, initialValue?: any) {
@@ -157,8 +157,8 @@ class ArrayCollection<T> implements IArrayCollection<T> {
       previousValue: T,
       currentValue: T,
       currentIndex: number,
-      array: T[],
-    ) => T,
+      array: T[]
+    ) => T
   ): T;
 
   reduceRight(
@@ -166,9 +166,9 @@ class ArrayCollection<T> implements IArrayCollection<T> {
       previousValue: T,
       currentValue: T,
       currentIndex: number,
-      array: T[],
+      array: T[]
     ) => T,
-    initialValue: T,
+    initialValue: T
   ): T;
 
   reduceRight<U>(
@@ -176,9 +176,9 @@ class ArrayCollection<T> implements IArrayCollection<T> {
       previousValue: U,
       currentValue: T,
       currentIndex: number,
-      array: T[],
+      array: T[]
     ) => U,
-    initialValue: U,
+    initialValue: U
   ): U;
 
   reduceRight(callbackfn: any, initialValue?: any) {

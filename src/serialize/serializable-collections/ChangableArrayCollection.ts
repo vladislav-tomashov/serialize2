@@ -15,13 +15,12 @@ import { getId } from "../utils/id-utils";
 import { getContext } from "../../context/context";
 import { TSerializableValue } from "../serialize.interface";
 import { fromSerializedValue } from "../utils/serialize-utils";
-import { ISystemChanges } from "../services/services.interface";
 
 export class ChangableArrayCollection<T> extends ArrayCollection<T>
   implements IChangableArrayCollection<T> {
   private _id = getId();
 
-  constructor(value: any) {
+  constructor(value?: any, private _context = getContext()) {
     super(value);
 
     const changeObj = this._createChangesObject();
@@ -29,19 +28,15 @@ export class ChangableArrayCollection<T> extends ArrayCollection<T>
   }
 
   // Interface ISerializable
-  serializable: true = true;
+  get serializable(): true {
+    return true;
+  }
 
   get id(): string {
     return this._id;
   }
 
   applyChanges(changes: ICollectionChanges): void {
-    // if (changes.className !== this.getClassName()) {
-    //   throw new Error(
-    //     `Cannot applyChanges, because changes have different className: "${changes.className}" !== "this.getClassName()"`
-    //   );
-    // }
-
     changes.log.forEach((change) => {
       this._applyChange(change);
     });
@@ -118,9 +113,8 @@ export class ChangableArrayCollection<T> extends ArrayCollection<T>
   }
 
   // private and protected
-  protected _createChangesObject(
-    changes: ISystemChanges = getContext().changes
-  ): ArrayCollectionChanges<T> {
+  protected _createChangesObject(): ArrayCollectionChanges<T> {
+    const { changes } = this._context;
     const result = new ArrayCollectionChanges<T>();
 
     changes.setChangeObject(this, result);
@@ -128,16 +122,16 @@ export class ChangableArrayCollection<T> extends ArrayCollection<T>
     return result;
   }
 
-  protected _getChangeObject(
-    changes: ISystemChanges = getContext().changes
-  ): ArrayCollectionChanges<T> {
+  protected _getChangeObject(): ArrayCollectionChanges<T> {
+    const { changes } = this._context;
     const result = changes.getChangeObject(this) as ArrayCollectionChanges<T>;
 
-    return result ? result : this._createChangesObject(changes);
+    return result ? result : this._createChangesObject();
   }
 
   protected _applyChange(change: ICollectionChange): void {
     const { operation = CollectionChangeType.All, data } = change;
+    const { objects } = this._context;
 
     switch (operation) {
       case CollectionChangeType.Splice: {
@@ -146,7 +140,7 @@ export class ChangableArrayCollection<T> extends ArrayCollection<T>
         >;
 
         const newItems = items
-          ? items.map((x) => (fromSerializedValue(x) as unknown) as T)
+          ? items.map((x) => (fromSerializedValue(x, objects) as unknown) as T)
           : undefined;
 
         if (deleteCount && newItems) {
@@ -159,7 +153,7 @@ export class ChangableArrayCollection<T> extends ArrayCollection<T>
       case CollectionChangeType.Push: {
         const items = data as TCollectionPushChange<TSerializableValue>;
         const newItems = items.map(
-          (x) => (fromSerializedValue(x) as unknown) as T
+          (x) => (fromSerializedValue(x, objects) as unknown) as T
         );
         super.push(...newItems);
         break;
@@ -167,7 +161,7 @@ export class ChangableArrayCollection<T> extends ArrayCollection<T>
       case CollectionChangeType.Unshift: {
         const items = data as TCollectionUnshiftChange<TSerializableValue>;
         const newItems = items.map(
-          (x) => (fromSerializedValue(x) as unknown) as T
+          (x) => (fromSerializedValue(x, objects) as unknown) as T
         );
         super.unshift(...newItems);
         break;
@@ -183,14 +177,14 @@ export class ChangableArrayCollection<T> extends ArrayCollection<T>
       case CollectionChangeType.All: {
         const items = data as TCollectionAllChange<TSerializableValue>;
         const newItems = items.map(
-          (x) => (fromSerializedValue(x) as unknown) as T
+          (x) => (fromSerializedValue(x, objects) as unknown) as T
         );
         this._array = newItems;
         break;
       }
       case CollectionChangeType.Set: {
         const [index, value] = data as TCollectionSetChange<TSerializableValue>;
-        const newValue = (fromSerializedValue(value) as unknown) as T;
+        const newValue = (fromSerializedValue(value, objects) as unknown) as T;
         super.set(index, newValue);
         break;
       }

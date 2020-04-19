@@ -5,7 +5,7 @@ import {
   ISerializable,
   TPrimitiveType,
 } from "../serialize.interface";
-import { getContext } from "../../context/context";
+import { ISerializableObjects } from "../services/services.interface";
 
 const toSerializedValue = (value: any): TSerializableValue | never => {
   if (isSerializable(value)) {
@@ -29,7 +29,7 @@ const toSerializedValue = (value: any): TSerializableValue | never => {
 
 const fromSerializedValue = (
   serializableValue: TSerializableValue,
-  objects = getContext().objects
+  objects: ISerializableObjects
 ): TPrimitiveType | ISerializable | never => {
   const [valueType, value] = serializableValue;
 
