@@ -29,7 +29,7 @@ export class ObjectChanges<T, K extends keyof T> implements IChangeObject {
     if (this._allPropertiesChanged) {
       const log = Object.entries(source.getAllProperties()).map(
         ([prop, val]) => ({
-          operation: "update",
+          // operation: ObjectChangeType.PropertyChange,
           property: prop as string,
           value: toSerializedValue(val),
         })
@@ -47,7 +47,7 @@ export class ObjectChanges<T, K extends keyof T> implements IChangeObject {
     }
 
     const log = Array.from(this._log).map((prop) => ({
-      operation: "update",
+      // operation: ObjectChangeType.PropertyChange,
       property: prop as string,
       value: toSerializedValue(source.getProperty(prop)),
     }));

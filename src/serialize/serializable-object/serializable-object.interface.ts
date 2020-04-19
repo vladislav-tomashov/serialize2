@@ -20,3 +20,7 @@ export interface IObjectChanges extends IChanges {
 export interface IBaseSerializable<T, K extends keyof T>
   extends ISerializable,
     IGetProperty<T, K> {}
+
+export enum ObjectChangeType {
+  PropertyChange = "update",
+}

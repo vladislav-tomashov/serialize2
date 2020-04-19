@@ -15,6 +15,7 @@ import { getId } from "../utils/id-utils";
 import { getContext } from "../../context/context";
 import { TSerializableValue } from "../serialize.interface";
 import { fromSerializedValue } from "../utils/serialize-utils";
+import { ISystemChanges } from "../services/services.interface";
 
 export class ChangableArrayCollection<T> extends ArrayCollection<T>
   implements IChangableArrayCollection<T> {
@@ -23,11 +24,8 @@ export class ChangableArrayCollection<T> extends ArrayCollection<T>
   constructor(value: any) {
     super(value);
 
-    const { changes } = getContext();
-    const changeObj = new ArrayCollectionChanges<T>();
-
+    const changeObj = this._createChangesObject();
     changeObj.setAllPropertiesChanged();
-    changes.setChangeObject(this, changeObj);
   }
 
   // Interface ISerializable
@@ -38,13 +36,11 @@ export class ChangableArrayCollection<T> extends ArrayCollection<T>
   }
 
   applyChanges(changes: ICollectionChanges): void {
-    if (changes.className !== this.getClassName()) {
-      throw new Error(
-        `Cannot applyChanges, because changes have different className: "${changes.className}" !== "this.getClassName()"`
-      );
-    }
-
-    this._id = changes.id;
+    // if (changes.className !== this.getClassName()) {
+    //   throw new Error(
+    //     `Cannot applyChanges, because changes have different className: "${changes.className}" !== "this.getClassName()"`
+    //   );
+    // }
 
     changes.log.forEach((change) => {
       this._applyChange(change);
@@ -122,24 +118,26 @@ export class ChangableArrayCollection<T> extends ArrayCollection<T>
   }
 
   // private and protected
-  protected _getChangeObject(): ArrayCollectionChanges<T> {
-    const { changes } = getContext();
-    const existingChageObj = changes.getChangeObject(
-      this
-    ) as ArrayCollectionChanges<T>;
+  protected _createChangesObject(
+    changes: ISystemChanges = getContext().changes
+  ): ArrayCollectionChanges<T> {
+    const result = new ArrayCollectionChanges<T>();
 
-    if (existingChageObj) {
-      return existingChageObj;
-    }
+    changes.setChangeObject(this, result);
 
-    const newChangeObj = new ArrayCollectionChanges<T>();
-    changes.setChangeObject(this, newChangeObj);
+    return result;
+  }
 
-    return newChangeObj;
+  protected _getChangeObject(
+    changes: ISystemChanges = getContext().changes
+  ): ArrayCollectionChanges<T> {
+    const result = changes.getChangeObject(this) as ArrayCollectionChanges<T>;
+
+    return result ? result : this._createChangesObject(changes);
   }
 
   protected _applyChange(change: ICollectionChange): void {
-    const { operation, data } = change;
+    const { operation = CollectionChangeType.All, data } = change;
 
     switch (operation) {
       case CollectionChangeType.Splice: {

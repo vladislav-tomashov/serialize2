@@ -1,5 +1,12 @@
-import { ISerializable, isSerializable } from "../serialize.interface";
-import { ISerializableObjects } from "./services.interface";
+import {
+  ISerializable,
+  isSerializable,
+  IChanges,
+} from "../serialize.interface";
+import {
+  ISerializableObjects,
+  ISerializableClasses,
+} from "./services.interface";
 
 export class SerializableObjects implements ISerializableObjects {
   private _objects: { [key: string]: ISerializable } = {};
@@ -12,9 +19,7 @@ export class SerializableObjects implements ISerializableObjects {
     }
 
     if (this._objects[obj.id] !== undefined) {
-      throw new Error(
-        `SerializeService.registerSerializableObject(): Object with id "${obj.id}" is already registered`
-      );
+      throw new Error(`Object with id "${obj.id}" is already registered`);
     }
 
     this._objects[obj.id] = obj;
@@ -49,6 +54,16 @@ export class SerializableObjects implements ISerializableObjects {
     return this._objects[id];
   }
 
+  getObjectOrThrow(id: string): ISerializable {
+    const result = this._objects[id];
+
+    if (!result) {
+      throw new Error(`Cannot find object with id=${id}`);
+    }
+
+    return result;
+  }
+
   hasObject(id: string): boolean;
   hasObject(obj: ISerializable): boolean;
   hasObject(idOrObj: any): boolean {
@@ -69,5 +84,46 @@ export class SerializableObjects implements ISerializableObjects {
 
   clear(): void {
     this._objects = {};
+  }
+
+  createOrUpdateObjects(
+    changes: IChanges[],
+    classes: ISerializableClasses
+  ): ISerializable[] {
+    changes.forEach((x) => this._createObject(x, classes));
+
+    return changes.map((x) => this._updateObject(x));
+  }
+
+  //private
+  private _createObject(
+    change: IChanges,
+    classes: ISerializableClasses
+  ): ISerializable | undefined {
+    const { id, className } = change;
+    const obj = this.getObject(id);
+
+    if (obj) {
+      return undefined;
+    }
+
+    const objClass = classes.getClassOrThrow(className);
+    const newObj = Object.create(objClass.prototype);
+
+    newObj.serializable = true;
+    newObj._id = id;
+
+    this.addObject(newObj);
+
+    return newObj;
+  }
+
+  private _updateObject(change: IChanges): ISerializable {
+    const { id } = change;
+    const obj = this.getObjectOrThrow(id);
+
+    obj.applyChanges(change);
+
+    return obj;
   }
 }

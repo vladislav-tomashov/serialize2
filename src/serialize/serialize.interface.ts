@@ -24,6 +24,10 @@ export interface ISetProperty<T, K extends keyof T> {
   setProperty(prop: K, value: T[K]): void;
 }
 
+export interface ISerializableExtended<T, K extends keyof T>
+  extends ISerializable,
+    IGetProperty<T, K> {}
+
 export interface IChangeObject {
   getChanges(source: ISerializable): IChanges | undefined;
   setAllPropertiesChanged(): void;
@@ -36,7 +40,7 @@ export interface IChanges {
 }
 
 export interface IChange {
-  operation: string;
+  operation?: string;
   [key: string]: any;
 }
 

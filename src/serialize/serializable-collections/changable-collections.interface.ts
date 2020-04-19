@@ -8,13 +8,13 @@ import {
 import { IArrayCollection } from "../../collections/collections.interface";
 
 export enum CollectionChangeType {
-  Push = "Push",
-  Pop = "Pop",
-  Splice = "Splice",
-  Set = "Set",
-  Shift = "Shift",
-  Unshift = "Unshift",
-  All = "All",
+  Push = "push",
+  Pop = "pop",
+  Splice = "splice",
+  Set = "set",
+  Shift = "shift",
+  Unshift = "unshift",
+  All = "all",
 }
 
 export type TCollectionPushChange<T> = T[];

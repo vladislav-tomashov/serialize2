@@ -8,6 +8,9 @@ import {
 export interface ISerializableClasses {
   addClass(className: string, classObject: ISerializableClass): void;
 
+  getClass(className: string): ISerializableClass | undefined;
+  getClassOrThrow(className: string): ISerializableClass;
+
   deleteClass(className: string): void;
 
   clear(): void;
@@ -22,11 +25,17 @@ export interface ISerializableObjects {
   addCollection(arr: ISerializable[]): void;
 
   getObject(id: string): ISerializable | undefined;
+  getObjectOrThrow(id: string): ISerializable;
 
   hasObject(id: string): boolean;
   hasObject(obj: ISerializable): boolean;
 
   clear(): void;
+
+  createOrUpdateObjects(
+    changes: IChanges[],
+    classes: ISerializableClasses
+  ): ISerializable[];
 }
 
 export interface ISystemChanges {
@@ -34,7 +43,37 @@ export interface ISystemChanges {
 
   getChangeObject(key: ISerializable): IChangeObject | undefined;
 
-  getChanges(): IChanges[];
+  getChangesAsJson(): IChanges[];
 
   clear(): void;
+}
+
+export enum TranserStatus {
+  Initial,
+  Sent,
+  Received,
+  Sending,
+  Receiving,
+}
+
+export enum TranserResultStatus {
+  Success,
+  Error,
+  Pending,
+}
+
+export interface ITransferResult {
+  status: TranserResultStatus;
+  error?: any;
+  id: number;
+  changesAsString: string;
+  startTimestamp: string;
+  endTimestamp?: string;
+}
+
+export interface ISystemChangesTransferService {
+  readonly status: TranserStatus;
+  readonly result: ITransferResult;
+  transferChanges(changesAsString: string): Promise<void>;
+  receiveChanges(transferId: number, changesAsString: string): any;
 }

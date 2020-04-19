@@ -27,12 +27,12 @@ type TSpliceChange<T> = [
 ];
 
 type TChange<T> =
-  | TPushChange<T>
-  | TPopChange
   | TAllChange
+  | TPopChange
+  | TShiftChange
   | TSetChange<T>
   | TUnshiftChange<T>
-  | TShiftChange
+  | TPushChange<T>
   | TSpliceChange<T>;
 
 function getChange<T>(
@@ -182,10 +182,8 @@ export class ArrayCollectionChanges<T> implements IChangeObject {
     const className = source.getClassName();
 
     if (this._allPropertiesChanged) {
-      const operation = CollectionChangeType.All;
-      const change: TAllChange = [operation];
+      const change: TAllChange = [CollectionChangeType.All];
       const log = [change].map((x) => ({
-        operation,
         data: getChange(x, source),
       }));
 

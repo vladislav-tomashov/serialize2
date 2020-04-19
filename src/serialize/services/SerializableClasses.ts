@@ -12,6 +12,20 @@ export class SerializableClasses implements ISerializableClasses {
     this._classes[className] = classObject;
   }
 
+  getClass(className: string): ISerializableClass | undefined {
+    return this._classes[className];
+  }
+
+  getClassOrThrow(className: string): ISerializableClass {
+    const result = this._classes[className];
+
+    if (!result) {
+      throw new Error(`Class with name="${className}" is not found`);
+    }
+
+    return result;
+  }
+
   deleteClass(className: string): void {
     delete this._classes[className];
   }

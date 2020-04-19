@@ -28,7 +28,8 @@ const toSerializedValue = (value: any): TSerializableValue | never => {
 };
 
 const fromSerializedValue = (
-  serializableValue: TSerializableValue
+  serializableValue: TSerializableValue,
+  objects = getContext().objects
 ): TPrimitiveType | ISerializable | never => {
   const [valueType, value] = serializableValue;
 
@@ -36,7 +37,6 @@ const fromSerializedValue = (
     return value;
   }
 
-  const { objects } = getContext();
   const obj = objects.getObject(value as string);
 
   if (!obj) {

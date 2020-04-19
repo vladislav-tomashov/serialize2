@@ -16,7 +16,7 @@ export class SystemChanges implements ISystemChanges {
     this._changes.clear();
   }
 
-  getChanges(): IChanges[] {
+  getChangesAsJson(): IChanges[] {
     const result: IChanges[] = [];
 
     this._changes.forEach((changeObject, source) => {

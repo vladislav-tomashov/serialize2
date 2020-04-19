@@ -5,21 +5,20 @@ import {
   IBaseState,
   IObjectChanges,
   IBaseSerializable,
+  ObjectChangeType,
 } from "./serializable-object.interface";
 import { fromSerializedValue } from "../utils/serialize-utils";
+import { ISystemChanges } from "../services/services.interface";
 
 export class BaseSerializable<T extends IBaseState, K extends keyof T>
   implements IBaseSerializable<T, K> {
   private _id = getId();
 
-  protected _state: T = {} as T;
+  protected _state = {} as T;
 
   constructor() {
-    const { changes } = getContext();
-    const changeObj = new ObjectChanges<T, K>();
-
+    const changeObj = this._createChangesObject();
     changeObj.setAllPropertiesChanged();
-    changes.setChangeObject(this, changeObj);
   }
 
   // Interface ISerializable
@@ -30,18 +29,20 @@ export class BaseSerializable<T extends IBaseState, K extends keyof T>
   }
 
   applyChanges(changes: IObjectChanges): void {
-    if (changes.className !== this.getClassName()) {
-      throw new Error(
-        `Cannot applyChanges, because changes have different className: "${changes.className}" !== "this.getClassName()"`
-      );
-    }
+    // if (changes.className !== this.getClassName()) {
+    //   throw new Error(
+    //     `Cannot applyChanges, because changes have different className: "${changes.className}" !== "this.getClassName()"`
+    //   );
+    // }
 
-    this._id = changes.id;
+    if (!this._state) {
+      this._state = {} as T;
+    }
 
     changes.log.forEach((change) => {
       const { operation, value, property } = change;
 
-      if (operation !== "update") {
+      if (operation && operation !== ObjectChangeType.PropertyChange) {
         throw new Error(`Uknown operation "${operation}"`);
       }
 
@@ -69,20 +70,21 @@ export class BaseSerializable<T extends IBaseState, K extends keyof T>
     this._getChangeObject().setPropertyChanged(prop, value);
   }
 
-  protected _getChangeObject(): ObjectChanges<T, K> {
-    const { changes } = getContext();
-    const existingChageObj = changes.getChangeObject(this) as ObjectChanges<
-      T,
-      K
-    >;
+  protected _createChangesObject(
+    changes: ISystemChanges = getContext().changes
+  ): ObjectChanges<T, K> {
+    const result = new ObjectChanges<T, K>();
 
-    if (existingChageObj) {
-      return existingChageObj;
-    }
+    changes.setChangeObject(this, result);
 
-    const newChangeObj = new ObjectChanges<T, K>();
-    changes.setChangeObject(this, newChangeObj);
+    return result;
+  }
 
-    return newChangeObj;
+  protected _getChangeObject(
+    changes: ISystemChanges = getContext().changes
+  ): ObjectChanges<T, K> {
+    const result = changes.getChangeObject(this) as ObjectChanges<T, K>;
+
+    return result ? result : this._createChangesObject(changes);
   }
 }
