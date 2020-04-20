@@ -2,6 +2,7 @@ import { IClass1 } from "./IClass1";
 import { ChangableArrayCollection } from "../serialize/serializable-collections/ChangableArrayCollection";
 import { BaseSerializable } from "../serialize/serializable-object/BaseSerializable";
 import { IBaseState } from "../serialize/serializable-object/serializable-object.interface";
+import { registerClass } from "../serialize/services/ClassesRegistry";
 
 export interface IClass1State extends IBaseState {
   _prop1: string;
@@ -12,8 +13,7 @@ export interface IClass1State extends IBaseState {
 
 export type IClass1StateKey = keyof IClass1State;
 
-export class Class1Serializable
-  extends BaseSerializable<IClass1State, IClass1StateKey>
+class Class1Serializable extends BaseSerializable<IClass1State, IClass1StateKey>
   implements IClass1 {
   // not serializable
   private _prop4: string;
@@ -79,3 +79,7 @@ export class Class1Serializable
     this._arr.push(10);
   }
 }
+
+registerClass("Class1Serializable", Class1Serializable);
+
+export { Class1Serializable };

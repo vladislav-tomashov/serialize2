@@ -11,6 +11,8 @@ export interface IClassesRegistry {
 
   get(className: string): ISerializableClass<any, any> | undefined;
 
+  has(className: string): boolean;
+
   getOrThrow(className: string): ISerializableClass<any, any>;
 
   clear(): void;

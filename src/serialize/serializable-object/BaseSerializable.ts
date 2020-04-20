@@ -9,13 +9,15 @@ import {
 import { fromSerializedValue } from "../utils/serialize-utils";
 import { ISerializable } from "../serialize.interface";
 import { ISystem } from "../../system/system.interface";
+import { registerClass } from "../services/ClassesRegistry";
 
-export class BaseSerializable<T extends IBaseState, K extends keyof T>
+class BaseSerializable<T extends IBaseState, K extends keyof T>
   implements ISerializable<T, K> {
   protected _state: T;
 
   constructor(private _id = getId(), private _context = getContext()) {
     this._state = {} as T;
+
     const changeObj = this._createChangesObject();
     changeObj.setAllPropertiesChanged();
   }
@@ -94,3 +96,7 @@ export class BaseSerializable<T extends IBaseState, K extends keyof T>
     return result ? result : this._createChangesObject();
   }
 }
+
+registerClass("BaseSerializable", BaseSerializable);
+
+export { BaseSerializable };
