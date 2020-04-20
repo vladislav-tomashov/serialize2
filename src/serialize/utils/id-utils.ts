@@ -5,4 +5,14 @@ const getId = (): string => {
   return `${_id}`;
 };
 
-export { getId };
+const setId = (id: number): void => {
+  if (id <= _id) {
+    throw new Error(
+      `Argiment id=${id} cannot be less or equal to existing _id=${_id}.`
+    );
+  }
+
+  _id = id;
+};
+
+export { getId, setId };
