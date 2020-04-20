@@ -43,6 +43,8 @@ export interface IChangesRegistry {
 
   get(key: ISerializable<any, any>): IChangeObject<any, any> | undefined;
 
+  isEmpty(): boolean;
+
   getChangesAsJson(): IChanges[];
 
   clear(): void;

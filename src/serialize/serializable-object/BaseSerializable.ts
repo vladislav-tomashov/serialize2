@@ -1,4 +1,4 @@
-import { getId } from "../utils/id-utils";
+import { nextId } from "../utils/id-utils";
 import { getContext } from "../../context/context";
 import { ObjectChanges } from "./ObjectChanges";
 import {
@@ -15,7 +15,7 @@ class BaseSerializable<T extends IBaseState, K extends keyof T>
   implements ISerializable<T, K> {
   protected _state: T;
 
-  constructor(private _id = getId(), private _context = getContext()) {
+  constructor(protected _context = getContext(), private _id = nextId()) {
     this._state = {} as T;
 
     const changeObj = this._createChangesObject();
@@ -76,6 +76,10 @@ class BaseSerializable<T extends IBaseState, K extends keyof T>
 
   // protected and private
   protected _setProperty(prop: K, value: T[K]): void {
+    if (this._state[prop] === value) {
+      return;
+    }
+
     this._state[prop] = value;
     this._getChangeObject().setPropertyChanged(prop, value);
   }

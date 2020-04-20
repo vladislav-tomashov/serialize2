@@ -11,7 +11,7 @@ import {
   CollectionChangeType,
   ICollectionChanges,
 } from "./changable-collections.interface";
-import { getId } from "../utils/id-utils";
+import { nextId } from "../utils/id-utils";
 import { getContext } from "../../context/context";
 import { TSerializableValue } from "../serialize.interface";
 import { fromSerializedValue } from "../utils/serialize-utils";
@@ -22,8 +22,8 @@ class ChangableArrayCollection<T> extends ArrayCollection<T>
   implements IChangableArrayCollection<T> {
   constructor(
     value?: any,
-    private _id = getId(),
-    private _context = getContext()
+    private _context = getContext(),
+    private _id = nextId()
   ) {
     super(value);
 

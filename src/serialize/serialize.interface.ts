@@ -32,7 +32,7 @@ export interface ISerializableClass<T, K extends keyof T> {
 }
 
 export interface IChangeObject<T, K extends keyof T> {
-  getChanges(source: ISerializable<T, K>): IChanges | undefined;
+  getChanges(source: ISerializable<T, K>): IChanges;
   setAllPropertiesChanged(): void;
 }
 

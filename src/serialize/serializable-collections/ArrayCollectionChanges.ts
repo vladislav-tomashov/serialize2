@@ -41,7 +41,7 @@ type TChange<T> =
 function getChange<T>(
   change: TChange<T>,
   source: ISerializable<T[], number>
-): TCollectionChange<TSerializableValue> | undefined | never {
+): TCollectionChange<TSerializableValue> | undefined {
   const [changeType] = change;
 
   switch (changeType) {
@@ -178,9 +178,7 @@ export class ArrayCollectionChanges<T> implements IChangeObject<T[], number> {
     this._log.push(change);
   }
 
-  getChanges(
-    source: ISerializable<T[], number>
-  ): ICollectionChanges | undefined {
+  getChanges(source: ISerializable<T[], number>): ICollectionChanges {
     const id = source.id;
     const className = source.getClassName();
 
@@ -191,10 +189,6 @@ export class ArrayCollectionChanges<T> implements IChangeObject<T[], number> {
       }));
 
       return { id, className, log };
-    }
-
-    if (!this._log.length) {
-      return undefined;
     }
 
     const log = this._log.map((change) => {

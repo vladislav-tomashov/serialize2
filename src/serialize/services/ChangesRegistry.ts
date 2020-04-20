@@ -22,6 +22,10 @@ export class ChangesRegistry implements IChangesRegistry {
     this._changes.clear();
   }
 
+  isEmpty(): boolean {
+    return this._changes.size === 0;
+  }
+
   getChangesAsJson(): IChanges[] {
     const result: IChanges[] = [];
 

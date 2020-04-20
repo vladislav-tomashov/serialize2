@@ -23,7 +23,7 @@ export class ObjectChanges<T, K extends keyof T>
     this._log.add(prop);
   }
 
-  getChanges(source: ISerializable<T, K>): IObjectChanges | undefined {
+  getChanges(source: ISerializable<T, K>): IObjectChanges {
     const id = source.id;
     const className = source.getClassName();
 
@@ -34,24 +34,12 @@ export class ObjectChanges<T, K extends keyof T>
         })
       );
 
-      if (!log.length) {
-        return undefined;
-      }
-
       return { id, className, log };
-    }
-
-    if (!this._log.size) {
-      return undefined;
     }
 
     const log = Array.from(this._log).map((prop) => ({
       d: [prop, toSerializedValue(source.getProperty(prop))] as TPropertyChange,
     }));
-
-    if (!log.length) {
-      return undefined;
-    }
 
     return { id, log };
   }

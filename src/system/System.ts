@@ -7,6 +7,8 @@ import { treeToArray } from "../serialize/utils/tree-utils";
 import { ChangesTransferService } from "../serialize/services/ChangesTransferService";
 import { ChangableArrayCollection } from "../serialize/serializable-collections/ChangableArrayCollection";
 import { IChangableArrayCollection } from "../serialize/serializable-collections/changable-collections.interface";
+import { StaticVariablesSync } from "./StaticVariablesSync";
+import { getId } from "../serialize/utils/id-utils";
 
 const getNodes = (node: ISerializable<any, any>) =>
   Object.values(node.getAllProperties()).filter((x) => typeof x === "object");
@@ -20,9 +22,18 @@ export class System implements ISystem {
 
   private _transerService = new ChangesTransferService();
 
+  private _staticVariablesSync = new StaticVariablesSync(
+    this,
+    "variables-sync"
+  );
+
   private _root: IChangableArrayCollection<
     ISerializable<any, any>
-  > = new ChangableArrayCollection<ISerializable<any, any>>([], "root", this);
+  > = new ChangableArrayCollection<ISerializable<any, any>>(
+    [this._staticVariablesSync],
+    this,
+    "root"
+  );
 
   get root() {
     return this._root;
@@ -52,13 +63,15 @@ export class System implements ISystem {
   }
 
   async transferChanges(formatJson = false): Promise<void> {
-    const changesRegistry = this._changesRegistry.getChangesAsJson();
+    if (this._changesRegistry.isEmpty()) {
+      return;
+    }
+
+    this._staticVariablesSync.idCounter = getId();
+
+    const changes = this._changesRegistry.getChangesAsJson();
     const numberOfSpaces = formatJson ? 4 : undefined;
-    const changesAsString = JSON.stringify(
-      changesRegistry,
-      undefined,
-      numberOfSpaces
-    );
+    const changesAsString = JSON.stringify(changes, undefined, numberOfSpaces);
 
     await this._transerService.transferChanges(changesAsString);
 
