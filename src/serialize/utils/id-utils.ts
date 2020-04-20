@@ -10,7 +10,7 @@ const nextId = (): string => {
 const setId = (id: number): void => {
   if (id < _id) {
     throw new Error(
-      `Argiment id=${id} cannot be less or equal to existing _id=${_id}.`
+      `Argument id=${id} cannot be less or equal to existing _id=${_id}.`
     );
   }
 

@@ -1,20 +1,18 @@
 import { IClass1 } from "./IClass1";
 import { ChangableArrayCollection } from "../serialize/serializable-collections/ChangableArrayCollection";
 import { BaseSerializable } from "../serialize/serializable-object/BaseSerializable";
-import { IBaseState } from "../serialize/serializable-object/serializable-object.interface";
 import { registerClass } from "../serialize/services/ClassesRegistry";
 
-export interface IClass1State extends IBaseState {
-  _prop1: string;
-  _prop2: number;
-  prop3: string;
-  _arr: ChangableArrayCollection<number>;
-}
+// export interface IClass1State extends IBaseState {
+//   _prop1: string;
+//   _prop2: number;
+//   prop3: string;
+//   _arr: ChangableArrayCollection<number>;
+// }
 
-export type IClass1StateKey = keyof IClass1State;
+// export type IClass1StateKey = keyof IClass1State;
 
-class Class1Serializable extends BaseSerializable<IClass1State, IClass1StateKey>
-  implements IClass1 {
+class Class1Serializable extends BaseSerializable<any, any> implements IClass1 {
   // not serializable
   private _prop4: string;
 

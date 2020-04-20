@@ -4,7 +4,8 @@ import {
   IBaseState,
   IObjectChanges,
 } from "../serialize/serializable-object/serializable-object.interface";
-import { setId } from "../serialize/utils/id-utils";
+import { setId, getId } from "../serialize/utils/id-utils";
+import { ISystem } from "./system.interface";
 
 export interface IStaticVariablesSyncState extends IBaseState {
   idCounter: number;
@@ -16,6 +17,12 @@ class StaticVariablesSync extends BaseSerializable<
   IStaticVariablesSyncState,
   IStaticVariablesSyncStateKey
 > {
+  constructor(context: ISystem, id: string) {
+    super(context, id);
+
+    this.idCounter = getId();
+  }
+
   // Proxied state properties
   get idCounter() {
     return this.getProperty("idCounter") as number;

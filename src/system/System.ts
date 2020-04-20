@@ -35,6 +35,10 @@ export class System implements ISystem {
     "root"
   );
 
+  constructor() {
+    this.refreshObjectsRegistry();
+  }
+
   get root() {
     return this._root;
   }

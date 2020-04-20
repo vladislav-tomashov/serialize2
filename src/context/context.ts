@@ -4,7 +4,7 @@ import { IContext } from "./context.interface";
 class Context implements IContext {
   private _context: ISystem | undefined = undefined;
 
-  setContext = (context: ISystem) => {
+  setContext = (context: ISystem | undefined) => {
     this._context = context;
   };
 

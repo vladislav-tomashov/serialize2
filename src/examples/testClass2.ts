@@ -1,22 +1,22 @@
-import { Class1Serializable } from "./Class1Serializable";
+import { Class2Serializable } from "./Class2Serializable";
 import { System } from "../system/System";
 import { setContext } from "../context/context";
 import { jsonReplacer } from "./test-utils";
 
 export default async function () {
   console.log("");
-  console.log("========== Class1Serializable tests ==========");
+  console.log("========== Class2Serializable tests ==========");
 
   try {
     // Serialization
     const system1 = new System();
     setContext(system1);
 
-    const a = new Class1Serializable(1, "a");
+    const a = new Class2Serializable();
 
     system1.root.push(a);
 
-    await system1.transferChanges(false);
+    await system1.transferChanges(true);
 
     // Deserialization
     const system2 = new System();
@@ -30,10 +30,9 @@ export default async function () {
     // Serialization
     const cloneA = system2.objectsRegistry.getOrThrow(
       a.id
-    ) as Class1Serializable;
-
-    cloneA.func1();
-    cloneA.prop3 = "test";
+    ) as Class2Serializable;
+    cloneA.prop1.func1();
+    cloneA.prop1.prop3 = "test";
 
     await system2.transferChanges(false);
 
@@ -48,7 +47,7 @@ export default async function () {
     console.log(JSON.stringify(system1.objectsRegistry, jsonReplacer, 4));
   } finally {
     setContext(undefined);
-    console.log("========== end Class1Serializable tests ==========");
+    console.log("========== end Class2Serializable tests ==========");
     console.log("");
   }
 }
