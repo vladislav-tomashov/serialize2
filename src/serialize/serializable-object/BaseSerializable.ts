@@ -101,6 +101,6 @@ class BaseSerializable<T extends IBaseState, K extends keyof T>
   }
 }
 
-registerClass("BaseSerializable", BaseSerializable);
+registerClass(BaseSerializable);
 
 export { BaseSerializable };

@@ -39,6 +39,6 @@ class StaticVariablesSync extends BaseSerializable<
   }
 }
 
-registerClass("StaticVariablesSync", StaticVariablesSync);
+registerClass(StaticVariablesSync);
 
 export { StaticVariablesSync };

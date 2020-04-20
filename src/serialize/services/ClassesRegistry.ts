@@ -42,8 +42,8 @@ class ClassesRegistry implements IClassesRegistry {
 }
 
 const registerClass = (
-  className: string,
-  classObject: ISerializableClass<any, any>
+  classObject: ISerializableClass<any, any>,
+  className: string = classObject.name
 ): void => {
   if (!isSerializable(classObject.prototype)) {
     throw new Error(

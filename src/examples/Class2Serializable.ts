@@ -35,6 +35,6 @@ class Class2Serializable extends BaseSerializable<any, any> implements IClass2 {
   }
 }
 
-registerClass("Class2Serializable", Class2Serializable);
+registerClass(Class2Serializable);
 
 export { Class2Serializable };

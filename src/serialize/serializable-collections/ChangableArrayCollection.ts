@@ -220,6 +220,6 @@ class ChangableArrayCollection<T> extends ArrayCollection<T>
   }
 }
 
-registerClass("ChangableArrayCollection", ChangableArrayCollection);
+registerClass(ChangableArrayCollection);
 
 export { ChangableArrayCollection };

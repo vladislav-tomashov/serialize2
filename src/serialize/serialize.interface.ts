@@ -28,6 +28,7 @@ export function isSerializable<T, K extends keyof T>(
 }
 
 export interface ISerializableClass<T, K extends keyof T> {
+  name: string;
   prototype: ISerializable<T, K>;
 }
 
