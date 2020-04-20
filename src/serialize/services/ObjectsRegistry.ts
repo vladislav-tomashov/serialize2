@@ -7,7 +7,7 @@ import { IObjectsRegistry } from "./services.interface";
 import { ISystem } from "../../system/system.interface";
 
 export class ObjectsRegistry implements IObjectsRegistry {
-  private _objectsTable: { [key: string]: ISerializable<any, any> } = {};
+  private _objectsRegistry: { [key: string]: ISerializable<any, any> } = {};
 
   add(obj: ISerializable<any, any>): void {
     if (!isSerializable(obj)) {
@@ -16,11 +16,11 @@ export class ObjectsRegistry implements IObjectsRegistry {
       );
     }
 
-    if (this._objectsTable[obj.id] !== undefined) {
+    if (this._objectsRegistry[obj.id] !== undefined) {
       throw new Error(`Object with id "${obj.id}" is already registered`);
     }
 
-    this._objectsTable[obj.id] = obj;
+    this._objectsRegistry[obj.id] = obj;
   }
 
   addMany(arr: ISerializable<any, any>[]): void {
@@ -28,11 +28,11 @@ export class ObjectsRegistry implements IObjectsRegistry {
   }
 
   get(id: string): ISerializable<any, any> | undefined {
-    return this._objectsTable[id];
+    return this._objectsRegistry[id];
   }
 
   getOrThrow(id: string): ISerializable<any, any> {
-    const result = this._objectsTable[id];
+    const result = this._objectsRegistry[id];
 
     if (!result) {
       throw new Error(`Cannot find object with id=${id}`);
@@ -42,7 +42,7 @@ export class ObjectsRegistry implements IObjectsRegistry {
   }
 
   clear(): void {
-    this._objectsTable = {};
+    this._objectsRegistry = {};
   }
 
   createOrUpdateObjects(
