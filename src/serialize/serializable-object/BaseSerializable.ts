@@ -4,18 +4,18 @@ import { ObjectChanges } from "./ObjectChanges";
 import {
   IBaseState,
   IObjectChanges,
-  IBaseSerializable,
   ObjectChangeType,
 } from "./serializable-object.interface";
 import { fromSerializedValue } from "../utils/serialize-utils";
+import { ISerializable } from "../serialize.interface";
+import { ISystem } from "../../system/system.interface";
 
 export class BaseSerializable<T extends IBaseState, K extends keyof T>
-  implements IBaseSerializable<T, K> {
-  private _id = getId();
+  implements ISerializable<T, K> {
+  protected _state: T;
 
-  protected _state = {} as T;
-
-  constructor(private _context = getContext()) {
+  constructor(private _id = getId(), private _context = getContext()) {
+    this._state = {} as T;
     const changeObj = this._createChangesObject();
     changeObj.setAllPropertiesChanged();
   }
@@ -29,21 +29,32 @@ export class BaseSerializable<T extends IBaseState, K extends keyof T>
     return this._id;
   }
 
-  applyChanges(changes: IObjectChanges): void {
-    const { objects } = this._context;
-
-    if (!this._state) {
-      this._state = {} as T;
+  initialize({ id, context }: { id: string; context: ISystem }): void {
+    if (this._state) {
+      throw new Error("initialize() can be called only once");
     }
 
-    changes.log.forEach((change) => {
-      const { operation, value, property } = change;
+    this._state = {} as T;
+    this._id = id;
+    this._context = context;
+  }
 
-      if (operation && operation !== ObjectChangeType.PropertyChange) {
-        throw new Error(`Uknown operation "${operation}"`);
+  applyChanges(changes: IObjectChanges): void {
+    const { objectsRegistry } = this._context;
+
+    changes.log.forEach((change) => {
+      const { op, d } = change;
+
+      if (op && op !== ObjectChangeType.PropertyChange) {
+        throw new Error(`Uknown op="${op}"`);
       }
 
-      const newValue = (fromSerializedValue(value, objects) as unknown) as T[K];
+      const [property, value] = d;
+      const newValue = (fromSerializedValue(
+        value,
+        objectsRegistry
+      ) as unknown) as T[K];
+
       this._state[property as K] = newValue;
     });
   }
@@ -68,17 +79,17 @@ export class BaseSerializable<T extends IBaseState, K extends keyof T>
   }
 
   protected _createChangesObject(): ObjectChanges<T, K> {
-    const { changes } = this._context;
+    const { changesRegistry } = this._context;
     const result = new ObjectChanges<T, K>();
 
-    changes.setChangeObject(this, result);
+    changesRegistry.set(this, result);
 
     return result;
   }
 
   protected _getChangeObject(): ObjectChanges<T, K> {
-    const { changes } = this._context;
-    const result = changes.getChangeObject(this) as ObjectChanges<T, K>;
+    const { changesRegistry } = this._context;
+    const result = changesRegistry.get(this) as ObjectChanges<T, K>;
 
     return result ? result : this._createChangesObject();
   }

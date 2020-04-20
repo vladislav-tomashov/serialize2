@@ -1,10 +1,10 @@
 import { ISerializableClass } from "../serialize.interface";
-import { ISerializableClasses } from "./services.interface";
+import { IClassesRegistry } from "./services.interface";
 
-export class SerializableClasses implements ISerializableClasses {
-  private _classes: { [key: string]: ISerializableClass } = {};
+export class ClassesRegistry implements IClassesRegistry {
+  private _classes: { [key: string]: ISerializableClass<any, any> } = {};
 
-  addClass(className: string, classObject: ISerializableClass): void {
+  add(className: string, classObject: ISerializableClass<any, any>): void {
     if (this._classes[className] !== undefined) {
       throw new Error(`Class with name "${className}" is already added.`);
     }
@@ -12,11 +12,11 @@ export class SerializableClasses implements ISerializableClasses {
     this._classes[className] = classObject;
   }
 
-  getClass(className: string): ISerializableClass | undefined {
+  get(className: string): ISerializableClass<any, any> | undefined {
     return this._classes[className];
   }
 
-  getClassOrThrow(className: string): ISerializableClass {
+  getOrThrow(className: string): ISerializableClass<any, any> {
     const result = this._classes[className];
 
     if (!result) {
@@ -24,10 +24,6 @@ export class SerializableClasses implements ISerializableClasses {
     }
 
     return result;
-  }
-
-  deleteClass(className: string): void {
-    delete this._classes[className];
   }
 
   clear(): void {

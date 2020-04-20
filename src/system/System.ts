@@ -1,31 +1,28 @@
-import { SerializableClasses } from "../serialize/services/SerializableClasses";
-import { SystemChanges } from "../serialize/services/SystemChanges";
-import { SerializableObjects } from "../serialize/services/SerializableObjects";
+import { ClassesRegistry } from "../serialize/services/ClassesRegistry";
+import { ChangesRegistry } from "../serialize/services/ChangesRegistry";
+import { ObjectsRegistry } from "../serialize/services/ObjectsRegistry";
 import { ISystem } from "./system.interface";
-import {
-  ISerializableExtended,
-  IGetProperty,
-} from "../serialize/serialize.interface";
+import { ISerializable } from "../serialize/serialize.interface";
 import { treeToArray } from "../serialize/utils/tree-utils";
-import { SystemChangesTransferService } from "../serialize/services/SystemChangesTransferService";
+import { ChangesTransferService } from "../serialize/services/ChangesTransferService";
 import { ChangableArrayCollection } from "../serialize/serializable-collections/ChangableArrayCollection";
 import { IChangableArrayCollection } from "../serialize/serializable-collections/changable-collections.interface";
 
-const getNodes = (node: IGetProperty<any, any>) =>
+const getNodes = (node: ISerializable<any, any>) =>
   Object.values(node.getAllProperties()).filter((x) => typeof x === "object");
 
 export class System implements ISystem {
-  private _classes = new SerializableClasses();
+  private _classesRegistry = new ClassesRegistry();
 
-  private _objects = new SerializableObjects();
+  private _objectsRegistry = new ObjectsRegistry();
 
-  private _changes = new SystemChanges();
+  private _changesRegistry = new ChangesRegistry();
 
-  private _transerService = new SystemChangesTransferService();
+  private _transerService = new ChangesTransferService();
 
   private _root: IChangableArrayCollection<
-    ISerializableExtended<any, any>
-  > = new ChangableArrayCollection<ISerializableExtended<any, any>>([], this);
+    ISerializable<any, any>
+  > = new ChangableArrayCollection<ISerializable<any, any>>([], "root", this);
 
   get root() {
     return this._root;
@@ -35,33 +32,38 @@ export class System implements ISystem {
     return this._transerService;
   }
 
-  get changes() {
-    return this._changes;
+  get changesRegistry() {
+    return this._changesRegistry;
   }
 
-  get classes() {
-    return this._classes;
+  get classesRegistry() {
+    return this._classesRegistry;
   }
 
-  get objects() {
-    return this._objects;
+  get objectsRegistry() {
+    return this._objectsRegistry;
   }
 
-  updateObjectsTable(): void {
+  refreshObjectsRegistry(): void {
     const objects = treeToArray(this._root, getNodes);
 
-    this._changes.clear();
-    this._objects.clear();
-    this._objects.addCollection(objects);
+    this._objectsRegistry.clear();
+    this._objectsRegistry.addMany(objects);
   }
 
   async transferChanges(formatJson = false): Promise<void> {
-    const changes = this._changes.getChangesAsJson();
+    const changesRegistry = this._changesRegistry.getChangesAsJson();
     const numberOfSpaces = formatJson ? 4 : undefined;
-    const changesAsString = JSON.stringify(changes, undefined, numberOfSpaces);
+    const changesAsString = JSON.stringify(
+      changesRegistry,
+      undefined,
+      numberOfSpaces
+    );
 
     await this._transerService.transferChanges(changesAsString);
-    this.updateObjectsTable();
+
+    this._changesRegistry.clear();
+    this.refreshObjectsRegistry();
   }
 
   receiveChanges(transerId: number, changesAsString: string): void {
@@ -76,7 +78,7 @@ export class System implements ISystem {
       );
     }
 
-    this._changes.clear();
-    this._objects.createOrUpdateObjects(changes, this);
+    this._changesRegistry.clear();
+    this._objectsRegistry.createOrUpdateObjects(changes, this);
   }
 }

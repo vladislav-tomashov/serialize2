@@ -1,11 +1,12 @@
-import { IChangeObject } from "../serialize.interface";
+import { IChangeObject, ISerializable } from "../serialize.interface";
 import {
   IObjectChanges,
-  IBaseSerializable,
+  TPropertyChange,
 } from "./serializable-object.interface";
 import { toSerializedValue } from "../utils/serialize-utils";
 
-export class ObjectChanges<T, K extends keyof T> implements IChangeObject {
+export class ObjectChanges<T, K extends keyof T>
+  implements IChangeObject<T, K> {
   private _log = new Set<K>();
 
   private _allPropertiesChanged = false;
@@ -22,16 +23,14 @@ export class ObjectChanges<T, K extends keyof T> implements IChangeObject {
     this._log.add(prop);
   }
 
-  getChanges(source: IBaseSerializable<T, K>): IObjectChanges | undefined {
+  getChanges(source: ISerializable<T, K>): IObjectChanges | undefined {
     const id = source.id;
     const className = source.getClassName();
 
     if (this._allPropertiesChanged) {
       const log = Object.entries(source.getAllProperties()).map(
         ([prop, val]) => ({
-          // operation: ObjectChangeType.PropertyChange,
-          property: prop as string,
-          value: toSerializedValue(val),
+          d: [prop, toSerializedValue(val)] as TPropertyChange,
         })
       );
 
@@ -47,15 +46,13 @@ export class ObjectChanges<T, K extends keyof T> implements IChangeObject {
     }
 
     const log = Array.from(this._log).map((prop) => ({
-      // operation: ObjectChangeType.PropertyChange,
-      property: prop as string,
-      value: toSerializedValue(source.getProperty(prop)),
+      d: [prop, toSerializedValue(source.getProperty(prop))] as TPropertyChange,
     }));
 
     if (!log.length) {
       return undefined;
     }
 
-    return { id, className, log };
+    return { id, log };
   }
 }

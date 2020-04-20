@@ -1,26 +1,17 @@
-import {
-  IChange,
-  TSerializableValue,
-  IChanges,
-  ISerializable,
-  IGetProperty,
-} from "../serialize.interface";
+import { IChange, TSerializableValue, IChanges } from "../serialize.interface";
 
 export interface IBaseState {}
 
+export type TPropertyChange = [string, TSerializableValue];
+
 export interface IObjectChange extends IChange {
-  property: string;
-  value: TSerializableValue;
+  d: TPropertyChange;
 }
 
 export interface IObjectChanges extends IChanges {
   log: IObjectChange[];
 }
 
-export interface IBaseSerializable<T, K extends keyof T>
-  extends ISerializable,
-    IGetProperty<T, K> {}
-
 export enum ObjectChangeType {
-  PropertyChange = "update",
+  PropertyChange,
 }

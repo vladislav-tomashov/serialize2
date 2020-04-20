@@ -1,15 +1,14 @@
 import {
   TSerializableValue,
   isSerializable,
-  ValueType,
   ISerializable,
   TPrimitiveType,
 } from "../serialize.interface";
-import { ISerializableObjects } from "../services/services.interface";
+import { IObjectsRegistry } from "../services/services.interface";
 
 const toSerializedValue = (value: any): TSerializableValue | never => {
   if (isSerializable(value)) {
-    return [ValueType.reference, value.id];
+    return [value.id];
   }
 
   const typeOfValue = typeof value;
@@ -21,7 +20,7 @@ const toSerializedValue = (value: any): TSerializableValue | never => {
     typeOfValue === "boolean" ||
     typeOfValue === "undefined"
   ) {
-    return [ValueType.primitive, value];
+    return value;
   }
 
   throw new Error(`Value cannot be converted to TSerializableValue "${value}"`);
@@ -29,21 +28,13 @@ const toSerializedValue = (value: any): TSerializableValue | never => {
 
 const fromSerializedValue = (
   serializableValue: TSerializableValue,
-  objects: ISerializableObjects
-): TPrimitiveType | ISerializable | never => {
-  const [valueType, value] = serializableValue;
-
-  if (valueType === ValueType.primitive) {
-    return value;
+  objectsRegistry: IObjectsRegistry
+): TPrimitiveType | ISerializable<any, any> | never => {
+  if (!Array.isArray(serializableValue)) {
+    return serializableValue;
   }
 
-  const obj = objects.getObject(value as string);
-
-  if (!obj) {
-    throw new Error(`Object with id="${value}" is not found in system table.`);
-  }
-
-  return obj;
+  return objectsRegistry.getOrThrow(serializableValue[0]);
 };
 
 export { toSerializedValue, fromSerializedValue };

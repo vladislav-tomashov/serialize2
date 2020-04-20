@@ -3,18 +3,17 @@ import {
   IChange,
   TSerializableValue,
   ISerializable,
-  IGetProperty,
 } from "../serialize.interface";
 import { IArrayCollection } from "../../collections/collections.interface";
 
 export enum CollectionChangeType {
-  Push = "push",
-  Pop = "pop",
-  Splice = "splice",
-  Set = "set",
-  Shift = "shift",
-  Unshift = "unshift",
-  All = "all",
+  Push,
+  Pop,
+  Splice,
+  Set,
+  Shift,
+  Unshift,
+  All,
 }
 
 export type TCollectionPushChange<T> = T[];
@@ -39,13 +38,12 @@ export type TCollectionChange<T> =
   | TCollectionSpliceChange<T>;
 
 export interface ICollectionChange extends IChange {
-  data: TCollectionChange<TSerializableValue> | undefined;
+  d?: TCollectionChange<TSerializableValue>;
 }
 export interface ICollectionChanges extends IChanges {
   log: ICollectionChange[];
 }
 
 export interface IChangableArrayCollection<T>
-  extends ISerializable,
-    IGetProperty<T[], number>,
+  extends ISerializable<T[], number>,
     IArrayCollection<T> {}

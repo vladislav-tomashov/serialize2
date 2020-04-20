@@ -1,24 +1,24 @@
 import {
-  ISerializableClasses,
-  ISerializableObjects,
-  ISystemChanges,
+  IClassesRegistry,
+  IObjectsRegistry,
+  IChangesRegistry,
 } from "../serialize/services/services.interface";
-import { ISerializableExtended } from "../serialize/serialize.interface";
-import { SystemChangesTransferService } from "../serialize/services/SystemChangesTransferService";
+import { ChangesTransferService } from "../serialize/services/ChangesTransferService";
 import { IChangableArrayCollection } from "../serialize/serializable-collections/changable-collections.interface";
+import { ISerializable } from "../serialize/serialize.interface";
 
 export interface ISystem {
-  readonly classes: ISerializableClasses;
+  readonly classesRegistry: IClassesRegistry;
 
-  readonly objects: ISerializableObjects;
+  readonly objectsRegistry: IObjectsRegistry;
 
-  readonly changes: ISystemChanges;
+  readonly changesRegistry: IChangesRegistry;
 
-  readonly transerService: SystemChangesTransferService;
+  readonly transerService: ChangesTransferService;
 
-  readonly root: IChangableArrayCollection<ISerializableExtended<any, any>>;
+  readonly root: IChangableArrayCollection<ISerializable<any, any>>;
 
-  updateObjectsTable(): void;
+  refreshObjectsRegistry(): void;
 
   transferChanges(formatJson: boolean): Promise<void>;
 

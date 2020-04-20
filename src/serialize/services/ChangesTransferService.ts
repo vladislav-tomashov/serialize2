@@ -1,22 +1,21 @@
 import {
-  ISystemChangesTransferService,
+  IChangesTransferService,
   TranserStatus,
   ITransferResult,
   TranserResultStatus,
 } from "./services.interface";
 
-export class SystemChangesTransferService
-  implements ISystemChangesTransferService {
+export class ChangesTransferService implements IChangesTransferService {
   private _id: number = 0;
   private _status: TranserStatus = TranserStatus.Initial;
-  private _lastTransterResult = {} as ITransferResult;
+  private _result = {} as ITransferResult;
 
   get status() {
     return this._status;
   }
 
   get result() {
-    return this._lastTransterResult;
+    return this._result;
   }
 
   async transferChanges(changesAsString: string): Promise<void> {
@@ -30,7 +29,7 @@ export class SystemChangesTransferService
     this._status = TranserStatus.Sending;
     this._id = this._id + 1;
 
-    this._lastTransterResult = {
+    this._result = {
       id: this._id,
       startTimestamp: new Date().toISOString(),
       status: TranserResultStatus.Pending,
@@ -39,15 +38,15 @@ export class SystemChangesTransferService
 
     try {
       // TODO: Send this object over network
-      this._lastTransterResult.status = TranserResultStatus.Success;
+      this._result.status = TranserResultStatus.Success;
     } catch (e) {
-      this._lastTransterResult.status = TranserResultStatus.Error;
-      this._lastTransterResult.error = e;
+      this._result.status = TranserResultStatus.Error;
+      this._result.error = e;
 
       throw e;
     } finally {
       this._status = TranserStatus.Sent;
-      this._lastTransterResult.endTimestamp = new Date().toISOString();
+      this._result.endTimestamp = new Date().toISOString();
     }
   }
 
@@ -60,7 +59,7 @@ export class SystemChangesTransferService
     }
 
     try {
-      this._lastTransterResult = {
+      this._result = {
         id,
         startTimestamp: new Date().toISOString(),
         status: TranserResultStatus.Pending,
@@ -78,16 +77,16 @@ export class SystemChangesTransferService
       this._id = id;
 
       const result = JSON.parse(changesAsString);
-      this._lastTransterResult.status = TranserResultStatus.Success;
+      this._result.status = TranserResultStatus.Success;
 
       return result;
     } catch (e) {
-      this._lastTransterResult.status = TranserResultStatus.Error;
-      this._lastTransterResult.error = e;
+      this._result.status = TranserResultStatus.Error;
+      this._result.error = e;
 
       throw e;
     } finally {
-      this._lastTransterResult.endTimestamp = new Date().toISOString();
+      this._result.endTimestamp = new Date().toISOString();
       this._status = TranserStatus.Received;
     }
   }

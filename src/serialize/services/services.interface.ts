@@ -6,40 +6,40 @@ import {
 } from "../serialize.interface";
 import { ISystem } from "../../system/system.interface";
 
-export interface ISerializableClasses {
-  addClass(className: string, classObject: ISerializableClass): void;
+export interface IClassesRegistry {
+  add(className: string, classObject: ISerializableClass<any, any>): void;
 
-  getClass(className: string): ISerializableClass | undefined;
-  getClassOrThrow(className: string): ISerializableClass;
+  get(className: string): ISerializableClass<any, any> | undefined;
 
-  deleteClass(className: string): void;
+  getOrThrow(className: string): ISerializableClass<any, any>;
 
   clear(): void;
 }
 
-export interface ISerializableObjects {
-  addObject(obj: ISerializable): void;
+export interface IObjectsRegistry {
+  add(obj: ISerializable<any, any>): void;
 
-  deleteObject(id: string): void;
-  deleteObject(obj: ISerializable): void;
+  addMany(arr: ISerializable<any, any>[]): void;
 
-  addCollection(arr: ISerializable[]): void;
+  get(id: string): ISerializable<any, any> | undefined;
 
-  getObject(id: string): ISerializable | undefined;
-  getObjectOrThrow(id: string): ISerializable;
-
-  hasObject(id: string): boolean;
-  hasObject(obj: ISerializable): boolean;
+  getOrThrow(id: string): ISerializable<any, any>;
 
   clear(): void;
 
-  createOrUpdateObjects(changes: IChanges[], context: ISystem): ISerializable[];
+  createOrUpdateObjects(
+    changes: IChanges[],
+    context: ISystem
+  ): ISerializable<any, any>[];
 }
 
-export interface ISystemChanges {
-  setChangeObject(key: ISerializable, changeObject: IChangeObject): void;
+export interface IChangesRegistry {
+  set(
+    key: ISerializable<any, any>,
+    changeObject: IChangeObject<any, any>
+  ): void;
 
-  getChangeObject(key: ISerializable): IChangeObject | undefined;
+  get(key: ISerializable<any, any>): IChangeObject<any, any> | undefined;
 
   getChangesAsJson(): IChanges[];
 
@@ -69,9 +69,12 @@ export interface ITransferResult {
   endTimestamp?: string;
 }
 
-export interface ISystemChangesTransferService {
+export interface IChangesTransferService {
   readonly status: TranserStatus;
+
   readonly result: ITransferResult;
+
   transferChanges(changesAsString: string): Promise<void>;
+
   receiveChanges(transferId: number, changesAsString: string): any;
 }

@@ -2,9 +2,12 @@ import {
   TCollectionChange,
   CollectionChangeType,
   ICollectionChanges,
-  IChangableArrayCollection,
 } from "./changable-collections.interface";
-import { IChangeObject, TSerializableValue } from "../serialize.interface";
+import {
+  IChangeObject,
+  TSerializableValue,
+  ISerializable,
+} from "../serialize.interface";
 import { toSerializedValue } from "../utils/serialize-utils";
 
 type TPushChange<T> = [CollectionChangeType.Push, T[]];
@@ -37,7 +40,7 @@ type TChange<T> =
 
 function getChange<T>(
   change: TChange<T>,
-  source: IChangableArrayCollection<T>
+  source: ISerializable<T[], number>
 ): TCollectionChange<TSerializableValue> | undefined | never {
   const [changeType] = change;
 
@@ -59,7 +62,7 @@ function getChange<T>(
       return undefined;
     }
     case CollectionChangeType.All: {
-      return source.toArray().map((x) => toSerializedValue(x));
+      return source.getAllProperties().map((x) => toSerializedValue(x));
     }
     case CollectionChangeType.Set: {
       const typedChange = change as TSetChange<T>;
@@ -79,8 +82,8 @@ function getChange<T>(
   }
 }
 
-export class ArrayCollectionChanges<T> implements IChangeObject {
-  private _log: Array<TChange<T>> = [];
+export class ArrayCollectionChanges<T> implements IChangeObject<T[], number> {
+  private _log: TChange<T>[] = [];
 
   private _allPropertiesChanged = false;
 
@@ -176,7 +179,7 @@ export class ArrayCollectionChanges<T> implements IChangeObject {
   }
 
   getChanges(
-    source: IChangableArrayCollection<T>
+    source: ISerializable<T[], number>
   ): ICollectionChanges | undefined {
     const id = source.id;
     const className = source.getClassName();
@@ -184,7 +187,7 @@ export class ArrayCollectionChanges<T> implements IChangeObject {
     if (this._allPropertiesChanged) {
       const change: TAllChange = [CollectionChangeType.All];
       const log = [change].map((x) => ({
-        data: getChange(x, source),
+        d: getChange(x, source),
       }));
 
       return { id, className, log };
@@ -194,11 +197,13 @@ export class ArrayCollectionChanges<T> implements IChangeObject {
       return undefined;
     }
 
-    const log = this._log.map((change) => ({
-      operation: change[0],
-      data: getChange(change, source),
-    }));
+    const log = this._log.map((change) => {
+      const d = getChange(change, source);
+      const op = change[0];
 
-    return { id, className, log };
+      return d ? { op, d } : { op };
+    });
+
+    return { id, log };
   }
 }

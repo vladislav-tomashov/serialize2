@@ -20,8 +20,8 @@ import { ChangableArrayCollection } from "../serialize/serializable-collections/
   const system1 = new System();
   setContext(system1);
 
-  system1.classes.addClass("Class1Serializable", Class1Serializable);
-  system1.classes.addClass(
+  system1.classesRegistry.add("Class1Serializable", Class1Serializable);
+  system1.classesRegistry.add(
     "ChangableArrayCollection",
     ChangableArrayCollection
   );
@@ -36,8 +36,8 @@ import { ChangableArrayCollection } from "../serialize/serializable-collections/
   const system2 = new System();
   setContext(system2);
 
-  system2.classes.addClass("Class1Serializable", Class1Serializable);
-  system2.classes.addClass(
+  system2.classesRegistry.add("Class1Serializable", Class1Serializable);
+  system2.classesRegistry.add(
     "ChangableArrayCollection",
     ChangableArrayCollection
   );
@@ -46,11 +46,11 @@ import { ChangableArrayCollection } from "../serialize/serializable-collections/
   console.log("serialized changes", changesAsString);
 
   system2.receiveChanges(transferId, changesAsString);
-  console.log(JSON.stringify(system2.objects, replacer, 4));
+  console.log(JSON.stringify(system2.objectsRegistry, replacer, 4));
 
   // Serialization
-  const cloneA = system2.objects.getObjectOrThrow(a.id) as Class1Serializable;
-  system2.updateObjectsTable();
+  const cloneA = system2.objectsRegistry.getOrThrow(a.id) as Class1Serializable;
+  system2.refreshObjectsRegistry();
 
   cloneA.func1();
   cloneA.prop3 = "test";
@@ -65,7 +65,7 @@ import { ChangableArrayCollection } from "../serialize/serializable-collections/
   console.log("serialized changes2", changesAsString2);
 
   system1.receiveChanges(transferId2, changesAsString2);
-  console.log(JSON.stringify(system1.objects, replacer, 4));
+  console.log(JSON.stringify(system1.objectsRegistry, replacer, 4));
 
   console.log("========== end Class1Serializable tests ==========");
   console.log("");
