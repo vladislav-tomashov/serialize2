@@ -7,11 +7,9 @@ import {
 import { ISystem } from "../../system/system.interface";
 
 export interface IClassesRegistry {
-  add(className: string, classObject: ISerializableClass<any, any>): void;
+  add(classObject: ISerializableClass<any, any>): void;
 
   get(className: string): ISerializableClass<any, any> | undefined;
-
-  has(className: string): boolean;
 
   getOrThrow(className: string): ISerializableClass<any, any>;
 

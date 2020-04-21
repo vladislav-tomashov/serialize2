@@ -10,7 +10,9 @@ const globalClassRegistry: IClassesRegistryMap = {};
 class ClassesRegistry implements IClassesRegistry {
   private _classesRegistry: IClassesRegistryMap = { ...globalClassRegistry };
 
-  add(className: string, classObject: ISerializableClass<any, any>): void {
+  add(classObject: ISerializableClass<any, any>): void {
+    const className = classObject.prototype.getClassName();
+
     if (this._classesRegistry[className] !== undefined) {
       throw new Error(`Class with name "${className}" is already added.`);
     }
@@ -20,10 +22,6 @@ class ClassesRegistry implements IClassesRegistry {
 
   get(className: string): ISerializableClass<any, any> | undefined {
     return this._classesRegistry[className];
-  }
-
-  has(className: string): boolean {
-    return !!this._classesRegistry[className];
   }
 
   getOrThrow(className: string): ISerializableClass<any, any> {
@@ -41,15 +39,14 @@ class ClassesRegistry implements IClassesRegistry {
   }
 }
 
-const registerClass = (
-  classObject: ISerializableClass<any, any>,
-  className: string = classObject.name
-): void => {
+const registerClass = (classObject: ISerializableClass<any, any>): void => {
   if (!isSerializable(classObject.prototype)) {
     throw new Error(
-      `Class "${className}" does not implement interface ISerializable.`
+      `Class "${classObject.name}" does not implement interface ISerializable.`
     );
   }
+
+  const className = classObject.prototype.getClassName();
 
   if (globalClassRegistry[className] !== undefined) {
     throw new Error(
