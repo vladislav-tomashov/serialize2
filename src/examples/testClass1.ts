@@ -25,7 +25,7 @@ export default async function () {
     console.log("serialized changes", changesAsString);
 
     system2.receiveChanges(transferId, changesAsString);
-    console.log(JSON.stringify(system2.objectsRegistry, jsonReplacer, 4));
+    // console.log(JSON.stringify(system2.objectsRegistry, jsonReplacer, 4));
 
     // Serialization
     const cloneA = system2.objectsRegistry.getOrThrow(
@@ -45,7 +45,7 @@ export default async function () {
     console.log("serialized changes2", changesAsString2);
 
     system1.receiveChanges(transferId2, changesAsString2);
-    console.log(JSON.stringify(system1.objectsRegistry, jsonReplacer, 4));
+    // console.log(JSON.stringify(system1.objectsRegistry, jsonReplacer, 4));
   } finally {
     setContext(undefined);
     console.log("========== end Class1Serializable tests ==========");

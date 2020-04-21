@@ -8,7 +8,6 @@ class Class1Serializable extends BaseSerializable<any, any> implements IClass1 {
   private _prop4: string;
 
   constructor(arg1: number, arg2: string) {
-    // Call base class constructor
     super();
 
     // Init properties with default values
