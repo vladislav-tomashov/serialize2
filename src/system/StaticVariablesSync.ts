@@ -1,4 +1,4 @@
-import { registerClass } from "../serialize/services/ClassesRegistry";
+import { registerSerializableClass } from "../serialize/services/ClassesRegistry";
 import { BaseSerializable } from "../serialize/serializable-object/BaseSerializable";
 import {
   IBaseState,
@@ -31,6 +31,6 @@ class StaticVariablesSync extends BaseSerializable<
   }
 }
 
-registerClass(StaticVariablesSync);
+registerSerializableClass(StaticVariablesSync);
 
 export { StaticVariablesSync };

@@ -39,7 +39,9 @@ class ClassesRegistry implements IClassesRegistry {
   }
 }
 
-const registerClass = (classObject: ISerializableClass<any, any>): void => {
+const registerSerializableClass = (
+  classObject: ISerializableClass<any, any>
+): void => {
   if (!isSerializable(classObject.prototype)) {
     throw new Error(
       `Class "${classObject.name}" does not implement interface ISerializable.`
@@ -57,4 +59,4 @@ const registerClass = (classObject: ISerializableClass<any, any>): void => {
   globalClassRegistry[className] = classObject;
 };
 
-export { ClassesRegistry, registerClass };
+export { ClassesRegistry, registerSerializableClass };

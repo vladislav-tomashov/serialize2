@@ -9,7 +9,7 @@ import {
 import { fromSerializedValue } from "../utils/serialize-utils";
 import { ISerializable } from "../serialize.interface";
 import { ISystem } from "../../system/system.interface";
-import { registerClass } from "../services/ClassesRegistry";
+import { registerSerializableClass } from "../services/ClassesRegistry";
 
 class BaseSerializable<T extends IBaseState, K extends keyof T>
   implements ISerializable<T, K> {
@@ -101,6 +101,6 @@ class BaseSerializable<T extends IBaseState, K extends keyof T>
   }
 }
 
-registerClass(BaseSerializable);
+registerSerializableClass(BaseSerializable);
 
 export { BaseSerializable };

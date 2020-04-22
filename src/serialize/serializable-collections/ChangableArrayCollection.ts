@@ -16,7 +16,7 @@ import { getContext } from "../../context/context";
 import { TSerializableValue } from "../serialize.interface";
 import { fromSerializedValue } from "../utils/serialize-utils";
 import { ISystem } from "../../system/system.interface";
-import { registerClass } from "../services/ClassesRegistry";
+import { registerSerializableClass } from "../services/ClassesRegistry";
 
 class ChangableArrayCollection<T> extends ArrayCollection<T>
   implements IChangableArrayCollection<T> {
@@ -220,6 +220,6 @@ class ChangableArrayCollection<T> extends ArrayCollection<T>
   }
 }
 
-registerClass(ChangableArrayCollection);
+registerSerializableClass(ChangableArrayCollection);
 
 export { ChangableArrayCollection };

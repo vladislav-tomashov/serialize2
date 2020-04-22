@@ -1,7 +1,7 @@
 import { Class2Serializable } from "./Class2Serializable";
 import { IClass3 } from "./IClass3";
 import { ChangableArrayCollection } from "../serialize/serializable-collections/ChangableArrayCollection";
-import { registerClass } from "../serialize/services/ClassesRegistry";
+import { registerSerializableClass } from "../serialize/services/ClassesRegistry";
 
 class Class3Serializable extends Class2Serializable implements IClass3 {
   constructor() {
@@ -34,6 +34,6 @@ class Class3Serializable extends Class2Serializable implements IClass3 {
   }
 }
 
-registerClass(Class3Serializable);
+registerSerializableClass(Class3Serializable);
 
 export { Class3Serializable };
