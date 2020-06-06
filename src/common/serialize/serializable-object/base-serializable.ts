@@ -18,7 +18,7 @@ class BaseSerializable<TState> implements ISerializable<TState> {
 
   constructor(
     private _id: string,
-    private _serializationContext?: ISerializationContext,
+    private _serializationContext?: ISerializationContext
   ) {
     if (_serializationContext) {
       _serializationContext.setChanged(this);
@@ -48,24 +48,37 @@ class BaseSerializable<TState> implements ISerializable<TState> {
   }
 
   getChanges(): IObjectChanges {
-    this._throwIfChangesWereNotCreated();
+    if (!this._changes) {
+      throw new Error(`Changes were not created`);
+    }
 
     return this._changes.getChanges(this);
   }
 
   clearChanges(): void {
-    this._throwIfChangesWereNotCreated();
-
     if (!this._changed) {
       return;
     }
 
     this._changed = false;
+
+    if (!this._changes) {
+      return;
+    }
+
     this._changes.clear();
   }
 
   setChanges(changes: IObjectChanges): void {
-    this._throwIfChangesWereNotCreated();
+    if (!this._serializationContext) {
+      throw new Error(`Serialization context was not provided`);
+    }
+
+    // if (this._changed) {
+    //   throw new Error("Object is changed!");
+    // }
+
+    this._changed = false;
 
     changes.log.forEach((change) => {
       const { op, d } = change;
@@ -77,7 +90,7 @@ class BaseSerializable<TState> implements ISerializable<TState> {
       const [prop, value] = d;
       const newValue = (fromSerializedValue(
         value,
-        this._serializationContext,
+        this._serializationContext as ISerializationContext
       ) as unknown) as TState[keyof TState];
 
       this._state[prop as keyof TState] = newValue;
@@ -100,7 +113,7 @@ class BaseSerializable<TState> implements ISerializable<TState> {
   // protected and private
   protected _setProperty(
     prop: keyof TState,
-    value: TState[keyof TState],
+    value: TState[keyof TState]
   ): void {
     if (this._state[prop] === value) {
       return;
@@ -119,13 +132,7 @@ class BaseSerializable<TState> implements ISerializable<TState> {
 
   private _setChanged() {
     if (!this._changed) {
-      this._serializationContext.setChanged(this);
-    }
-  }
-
-  private _throwIfChangesWereNotCreated() {
-    if (!this._changes) {
-      throw new Error(`Changes were not created`);
+      (this._serializationContext as ISerializationContext).setChanged(this);
     }
   }
 }

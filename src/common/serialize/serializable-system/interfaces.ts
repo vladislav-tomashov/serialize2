@@ -22,7 +22,7 @@ export interface ISerializableSystem {
 
   refreshObjectsRegistry(): void;
 
-  transferChanges(formatJson: boolean): Promise<void>;
+  transferChanges(formatJson: boolean): void;
 
   receiveChanges(transerId: number, changesAsString: string): void;
 }

@@ -45,7 +45,7 @@ export class SerializableSystem implements ISerializableSystem {
 
   private _currentIdSync = new IdGeneratorSync(
     "current-id-sync",
-    this._context,
+    this._context
   );
 
   private _root: IChangableArrayCollection<ISerializable<any>>;
@@ -54,7 +54,7 @@ export class SerializableSystem implements ISerializableSystem {
     this._root = new BaseChangableArrayCollection<ISerializable<any>>(
       "root",
       [...predefinedSerializables, this._currentIdSync],
-      this._context,
+      this._context
     );
 
     this.refreshObjectsRegistry();
@@ -91,8 +91,9 @@ export class SerializableSystem implements ISerializableSystem {
     this._objectsRegistry.addMany(objects);
   }
 
-  async transferChanges(formatJson = false): Promise<void> {
+  /*async*/ transferChanges(formatJson = false): void {
     if (this._changesRegistry.isEmpty()) {
+      console.log("transferChanges return");
       return;
     }
 
@@ -102,7 +103,7 @@ export class SerializableSystem implements ISerializableSystem {
     const numberOfSpaces = formatJson ? 4 : undefined;
     const changesAsString = JSON.stringify(changes, undefined, numberOfSpaces);
 
-    await this._transerService.transferChanges(changesAsString);
+    /*await*/ this._transerService.transferChanges(changesAsString);
 
     this._changesRegistry.clear();
     this.refreshObjectsRegistry();
@@ -111,12 +112,12 @@ export class SerializableSystem implements ISerializableSystem {
   receiveChanges(transerId: number, changesAsString: string): void {
     const changes = this._transerService.receiveChanges(
       transerId,
-      changesAsString,
+      changesAsString
     );
 
     if (!Array.isArray(changes)) {
       throw new Error(
-        "Error receiving changes: received data is not an Array<IChanges>.",
+        "Error receiving changes: received data is not an Array<IChanges>."
       );
     }
 

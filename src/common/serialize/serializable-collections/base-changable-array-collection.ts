@@ -28,7 +28,7 @@ class BaseChangableArrayCollection<TItem> extends ArrayCollection<TItem>
   constructor(
     private _id: string,
     value?: any,
-    private _serializationContext?: ISerializationContext,
+    private _serializationContext?: ISerializationContext
   ) {
     super(value);
 
@@ -59,24 +59,37 @@ class BaseChangableArrayCollection<TItem> extends ArrayCollection<TItem>
   }
 
   getChanges(): ICollectionChanges {
-    this._throwIfChangesWereNotCreated();
+    if (!this._changes) {
+      throw new Error(`Changes were not created`);
+    }
 
-    return this._changes.getChanges(this);
+    return (this._changes as ArrayCollectionChanges<TItem>).getChanges(this);
   }
 
   clearChanges(): void {
-    this._throwIfChangesWereNotCreated();
-
     if (!this._changed) {
       return;
     }
 
     this._changed = false;
+
+    if (!this._changes) {
+      return;
+    }
+
     this._changes.clear();
   }
 
   setChanges(changes: ICollectionChanges): void {
-    this._throwIfChangesWereNotCreated();
+    if (!this._serializationContext) {
+      throw new Error(`Serialization context was not provided`);
+    }
+
+    // if (this._changed) {
+    //   throw new Error("Object is changed!");
+    // }
+
+    this._changed = false;
 
     changes.log.forEach((change) => {
       this._applyChange(change);
@@ -211,8 +224,8 @@ class BaseChangableArrayCollection<TItem> extends ArrayCollection<TItem>
               (x) =>
                 (fromSerializedValue(
                   x,
-                  this._serializationContext,
-                ) as unknown) as TItem,
+                  this._serializationContext as ISerializationContext
+                ) as unknown) as TItem
             )
           : undefined;
 
@@ -231,8 +244,8 @@ class BaseChangableArrayCollection<TItem> extends ArrayCollection<TItem>
           (x) =>
             (fromSerializedValue(
               x,
-              this._serializationContext,
-            ) as unknown) as TItem,
+              this._serializationContext as ISerializationContext
+            ) as unknown) as TItem
         );
 
         super.push(...newItems);
@@ -246,8 +259,8 @@ class BaseChangableArrayCollection<TItem> extends ArrayCollection<TItem>
           (x) =>
             (fromSerializedValue(
               x,
-              this._serializationContext,
-            ) as unknown) as TItem,
+              this._serializationContext as ISerializationContext
+            ) as unknown) as TItem
         );
 
         super.unshift(...newItems);
@@ -273,8 +286,8 @@ class BaseChangableArrayCollection<TItem> extends ArrayCollection<TItem>
           (x) =>
             (fromSerializedValue(
               x,
-              this._serializationContext,
-            ) as unknown) as TItem,
+              this._serializationContext as ISerializationContext
+            ) as unknown) as TItem
         );
 
         this._array = newItems;
@@ -286,7 +299,7 @@ class BaseChangableArrayCollection<TItem> extends ArrayCollection<TItem>
         const [index, value] = d as TCollectionSetChange<TSerializableValue>;
         const newValue = (fromSerializedValue(
           value,
-          this._serializationContext,
+          this._serializationContext as ISerializationContext
         ) as unknown) as TItem;
 
         super.set(index, newValue);
@@ -301,13 +314,7 @@ class BaseChangableArrayCollection<TItem> extends ArrayCollection<TItem>
 
   private _setChanged() {
     if (!this._changed) {
-      this._serializationContext.setChanged(this);
-    }
-  }
-
-  private _throwIfChangesWereNotCreated() {
-    if (!this._changes) {
-      throw new Error(`Changes were not created`);
+      (this._serializationContext as ISerializationContext).setChanged(this);
     }
   }
 }

@@ -9,6 +9,10 @@ export class ChangesTransferService implements IChangesTransferService {
 
   private _result = {} as ITransferResult;
 
+  get id(): number {
+    return this._id;
+  }
+
   get status(): TranserStatus {
     return this._status;
   }
@@ -17,16 +21,18 @@ export class ChangesTransferService implements IChangesTransferService {
     return this._result;
   }
 
-  async transferChanges(changesAsString: string): Promise<void> {
+  /*async*/ transferChanges(changesAsString: string): void {
     if (
       this._status === TranserStatus.Receiving ||
       this._status === TranserStatus.Sending
     ) {
+      console.log("******************THROW*****");
       throw new Error(`Cannot transer changes because service is busy.`);
     }
 
     this._status = TranserStatus.Sending;
     this._id += 1;
+    console.log("this._id += 1", this._id);
 
     this._result = {
       id: this._id,
@@ -55,7 +61,8 @@ export class ChangesTransferService implements IChangesTransferService {
       this._status === TranserStatus.Receiving ||
       this._status === TranserStatus.Sending
     ) {
-      throw new Error(`Cannot transer changes because service is busy.`);
+      console.log("******************THROW*****");
+      throw new Error(`Cannot receive changes because service is busy.`);
     }
 
     try {
@@ -70,11 +77,12 @@ export class ChangesTransferService implements IChangesTransferService {
 
       if (id <= this._id) {
         throw new Error(
-          `Cannot receive changes because current system state is newer.`,
+          `Cannot receive changes because incoming transfer id=${id} is less or equal to current transfer id=${this._id}`
         );
       }
 
       this._id = id;
+      console.log("this._id = id", this._id);
 
       const result = JSON.parse(changesAsString);
 

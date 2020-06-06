@@ -7,7 +7,7 @@
     "tsc": "tsc ",
     "start:build": "tsc -w",
     "start:run": "nodemon build/index.js",
-    "start": "concurrently npm:start:*"
+    "start": "tsc && node build/index.js"
   },
   "keywords": [],
   "author": "Vlad Tomashov",
