@@ -80,6 +80,13 @@ export default async function () {
     console.log(changesAsString2);
     console.log("");
 
+    // system1 deserialization
+    // set system1 as current context
+    setApplicationContext({
+      serializationContext: system1.context,
+      idGenerator: idGenerator1,
+    });
+
     // receive changes from system2
     system1.receiveChanges(transferId2, changesAsString2);
     console.log("4) system1 state after receiving changes");
