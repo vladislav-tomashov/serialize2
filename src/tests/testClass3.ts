@@ -22,7 +22,7 @@
 //     // Deserialization
 //     const system2 = new System();
 
-//     const { id: transferId, changesAsString } = system1.transerService.result;
+//     const { id: transferId, changesAsString } = system1.transferService.result;
 //     console.log("");
 //     console.log("serialized changes", changesAsString);
 
@@ -46,7 +46,7 @@
 //     const {
 //       id: transferId2,
 //       changesAsString: changesAsString2,
-//     } = system2.transerService.result;
+//     } = system2.transferService.result;
 //     console.log("");
 //     console.log("serialized changes2", changesAsString2);
 

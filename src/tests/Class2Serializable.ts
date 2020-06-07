@@ -1,40 +1,50 @@
-// import { IClass2 } from "./IClass2";
-// import { Class1Serializable } from "./Class1Serializable";
-// import { ChangableArrayCollection } from "../serialize/serializable-collections/ChangableArrayCollection";
-// import { BaseSerializable } from "../serialize/serializable-object/BaseSerializable";
-// import { registerSerializableClass } from "../serialize/services/ClassesRegistry";
+import { IClass2 } from "./IClass2";
+import { Class1Serializable } from "./Class1Serializable";
+import {
+  ChangableArrayCollection,
+  SerializableObject,
+  registerSerializableClass,
+} from "../common/serialize";
 
-// class Class2Serializable extends BaseSerializable<any, any> implements IClass2 {
-//   constructor() {
-//     super();
+export interface IClass2State {
+  prop1: Class1Serializable;
 
-//     this.prop1 = new Class1Serializable(5, "abc");
-//     this.prop2 = new ChangableArrayCollection([
-//       new Class1Serializable(1, "test1"),
-//       new Class1Serializable(2, "test2"),
-//     ]);
-//   }
+  prop2: ChangableArrayCollection<Class1Serializable>;
+}
 
-//   // Proxied state properties
-//   public get prop1() {
-//     return this.getProperty("prop1") as Class1Serializable;
-//   }
+class Class2Serializable<T extends IClass2State = IClass2State>
+  extends SerializableObject<T>
+  implements IClass2 {
+  constructor() {
+    super();
 
-//   public set prop1(value: Class1Serializable) {
-//     this._setProperty("prop1", value);
-//   }
+    this.prop1 = new Class1Serializable(5, "abc");
+    this.prop2 = new ChangableArrayCollection([
+      new Class1Serializable(1, "test1"),
+      new Class1Serializable(2, "test2"),
+    ]);
+  }
 
-//   public get prop2() {
-//     return this.getProperty("prop2") as ChangableArrayCollection<
-//       Class1Serializable
-//     >;
-//   }
+  // Proxied state properties
+  public get prop1() {
+    return (this.getProperty("prop1") as unknown) as Class1Serializable;
+  }
 
-//   public set prop2(value: ChangableArrayCollection<Class1Serializable>) {
-//     this._setProperty("prop2", value);
-//   }
-// }
+  public set prop1(value: Class1Serializable) {
+    this._setProperty("prop1", (value as unknown) as T[keyof T]);
+  }
 
-// registerSerializableClass(Class2Serializable);
+  public get prop2() {
+    return (this.getProperty("prop2") as unknown) as ChangableArrayCollection<
+      Class1Serializable
+    >;
+  }
 
-// export { Class2Serializable };
+  public set prop2(value: ChangableArrayCollection<Class1Serializable>) {
+    this._setProperty("prop2", (value as unknown) as T[keyof T]);
+  }
+}
+
+registerSerializableClass(Class2Serializable);
+
+export { Class2Serializable };
