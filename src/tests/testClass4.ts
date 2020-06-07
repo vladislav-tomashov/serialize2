@@ -1,60 +1,96 @@
-// import { Class4Serializable } from "./Class4Serializable";
-// import { Class3Serializable } from "./Class3Serializable";
-// import { System } from "../system/System";
-// import { setContext } from "../context/context";
-// import { jsonReplacer } from "./test-utils";
+import { Class4Serializable } from "./Class4Serializable";
+import { Class3Serializable } from "./Class3Serializable";
+import { jsonReplacer } from "./test-utils";
+import { IdGenerator } from "../common/utils";
+import { SerializableSystem } from "../common/serialize";
+import {
+  setApplicationContext,
+  resetApplicationContext,
+} from "../common/context";
 
-// export default async function () {
-//   try {
-//     console.log("");
-//     console.log("========== Class4Serializable tests ==========");
+export default async function () {
+  console.log("");
+  console.log("========== Class4Serializable tests ==========");
+  console.log("");
 
-//     // Serialization
-//     const system1 = new System();
-//     setContext(system1);
+  // setup system1
+  const idGenerator1 = new IdGenerator();
+  const system1 = new SerializableSystem();
 
-//     const class3Inst = new Class3Serializable();
+  // setup system2
+  const idGenerator2 = new IdGenerator();
+  const system2 = new SerializableSystem();
 
-//     const a = new Class4Serializable(class3Inst, "test");
+  try {
+    // system1 serialization
+    // set system1 as current context
+    setApplicationContext({
+      serializationContext: system1.context,
+      idGenerator: idGenerator1,
+    });
 
-//     system1.root.push(a);
+    // create serializable object
+    const class3Inst = new Class3Serializable();
 
-//     await system1.transferChanges(true);
+    const a = new Class4Serializable(class3Inst, "test");
 
-//     // Deserialization
-//     const system2 = new System();
+    // create relation between this object and system1
+    system1.root.push(a);
 
-//     const { id: transferId, changesAsString } = system1.transferService.result;
-//     console.log("");
-//     console.log("serialized changes", changesAsString);
+    // transfer system1 changes
+    await system1.transferChanges(true);
 
-//     system2.receiveChanges(transferId, changesAsString);
-//     // console.log(JSON.stringify(system2.objectsRegistry, jsonReplacer, 4));
+    // get transfer result
+    const { id: transferId, changesAsString } = system1.transferService.result;
+    console.log("1) transfer system1 changes");
+    console.log(changesAsString);
+    console.log("");
 
-//     // Serialization
-//     const cloneA = system2.objectsRegistry.getOrThrow(
-//       a.id
-//     ) as Class4Serializable;
+    // system2 deserialization
+    // set system2 as current context
+    setApplicationContext({
+      serializationContext: system2.context,
+      idGenerator: idGenerator2,
+    });
 
-//     cloneA.ref.prop31.prop1.func1();
-//     cloneA.ref.prop31.prop1.prop3 = "ula-la";
-//     cloneA.prop41 = "test";
-//     await system2.transferChanges(false);
+    // receive changes from system1
+    system2.receiveChanges(transferId, changesAsString);
+    console.log("2) system2 state after receiving changes");
+    console.log(JSON.stringify(system2.objectsRegistry, jsonReplacer, 4));
+    console.log("");
 
-//     // Deserialization
-//     const {
-//       id: transferId2,
-//       changesAsString: changesAsString2,
-//     } = system2.transferService.result;
-//     console.log("");
-//     console.log("serialized changes2", changesAsString2);
+    // get some object from system2
+    const cloneA = system2.objectsRegistry.getOrThrow(
+      a.id
+    ) as Class4Serializable;
 
-//     system1.receiveChanges(transferId2, changesAsString2);
-//     // console.log(JSON.stringify(system1.objectsRegistry, jsonReplacer, 4));
-//   } finally {
-//     setContext(undefined);
-//     console.log("");
-//     console.log("========== end Class4Serializable tests ==========");
-//     console.log("");
-//   }
-// }
+    // modify this object
+    cloneA.ref.prop31.prop1.func1();
+    cloneA.ref.prop31.prop1.prop3 = "ula-la";
+    cloneA.prop41 = "test";
+
+    // transfer system2 changes
+    await system2.transferChanges(true);
+
+    // get transfer result
+    const {
+      id: transferId2,
+      changesAsString: changesAsString2,
+    } = system2.transferService.result;
+    console.log("3) transfer system2 changes");
+    console.log(changesAsString2);
+    console.log("");
+
+    // receive changes from system2
+    system1.receiveChanges(transferId2, changesAsString2);
+    console.log("4) system1 state after receiving changes");
+    console.log(JSON.stringify(system1.objectsRegistry, jsonReplacer, 4));
+  } catch (e) {
+    console.log(e);
+  } finally {
+    // reset current context
+    resetApplicationContext();
+    console.log("========== end Class4Serializable tests ==========");
+    console.log("");
+  }
+}
