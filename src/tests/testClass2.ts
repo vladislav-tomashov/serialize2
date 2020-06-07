@@ -1,5 +1,4 @@
 import { Class2Serializable } from "./Class2Serializable";
-import { jsonReplacer } from "./test-utils";
 import { IdGenerator } from "../common/utils";
 import { SerializableSystem } from "../common/serialize";
 import {
@@ -53,7 +52,7 @@ export default async function () {
     // receive changes from system1
     system2.receiveChanges(transferId, changesAsString);
     console.log("2) system2 state after receiving changes");
-    console.log(JSON.stringify(system2.objectsRegistry, jsonReplacer, 4));
+    console.log(JSON.stringify(system2.objectsRegistry, undefined, 4));
     console.log("");
 
     // get some object from system2
@@ -87,7 +86,7 @@ export default async function () {
     // receive changes from system2
     system1.receiveChanges(transferId2, changesAsString2);
     console.log("4) system1 state after receiving changes");
-    console.log(JSON.stringify(system1.objectsRegistry, jsonReplacer, 4));
+    console.log(JSON.stringify(system1.objectsRegistry, undefined, 4));
   } catch (e) {
     console.log(e);
   } finally {
