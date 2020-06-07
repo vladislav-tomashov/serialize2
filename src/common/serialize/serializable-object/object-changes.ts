@@ -9,10 +9,11 @@ import { toSerializedValue } from "../utils";
 export class ObjectChanges<TState> implements IChangeObject<TState> {
   private _log: { [key: string]: true } = {};
 
-  private _allPropertiesChanged = true;
+  constructor(private _allPropertiesChanged = true) {}
 
   clear(): void {
     this._log = {};
+    this._resetAllPropertiesChanged();
   }
 
   setAllPropertiesChanged(): void {
@@ -38,7 +39,7 @@ export class ObjectChanges<TState> implements IChangeObject<TState> {
       const log = Object.entries(source.getAllProperties()).map(
         ([prop, val]) => ({
           d: [prop, toSerializedValue(val)] as TPropertyChange,
-        }),
+        })
       );
 
       return { id, className, log };
@@ -52,5 +53,12 @@ export class ObjectChanges<TState> implements IChangeObject<TState> {
     }));
 
     return { id, log };
+  }
+
+  // private
+  private _resetAllPropertiesChanged(): void {
+    if (this._allPropertiesChanged) {
+      this._allPropertiesChanged = false;
+    }
   }
 }

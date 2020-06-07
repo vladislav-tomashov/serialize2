@@ -21,18 +21,16 @@ export class ChangesTransferService implements IChangesTransferService {
     return this._result;
   }
 
-  /*async*/ transferChanges(changesAsString: string): void {
+  async transferChanges(changesAsString: string): Promise<void> {
     if (
       this._status === TranserStatus.Receiving ||
       this._status === TranserStatus.Sending
     ) {
-      console.log("******************THROW*****");
       throw new Error(`Cannot transer changes because service is busy.`);
     }
 
     this._status = TranserStatus.Sending;
     this._id += 1;
-    console.log("this._id += 1", this._id);
 
     this._result = {
       id: this._id,
@@ -42,8 +40,8 @@ export class ChangesTransferService implements IChangesTransferService {
     };
 
     try {
-      // TODO: Here comes some function of sending this object over network
-      // sendChanges();
+      // TODO: Here comes some function of sending this object over network, e.g.
+      // await sendChanges();
       this._result.status = TranserResultStatus.Success;
     } catch (e) {
       this._result.status = TranserResultStatus.Error;
@@ -61,7 +59,6 @@ export class ChangesTransferService implements IChangesTransferService {
       this._status === TranserStatus.Receiving ||
       this._status === TranserStatus.Sending
     ) {
-      console.log("******************THROW*****");
       throw new Error(`Cannot receive changes because service is busy.`);
     }
 
@@ -82,7 +79,6 @@ export class ChangesTransferService implements IChangesTransferService {
       }
 
       this._id = id;
-      console.log("this._id = id", this._id);
 
       const result = JSON.parse(changesAsString);
 

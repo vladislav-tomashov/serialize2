@@ -91,10 +91,9 @@ export class SerializableSystem implements ISerializableSystem {
     this._objectsRegistry.addMany(objects);
   }
 
-  /*async*/ transferChanges(formatJson = false): void {
+  async transferChanges(formatJson = false): Promise<boolean> {
     if (this._changesRegistry.isEmpty()) {
-      console.log("transferChanges return");
-      return;
+      return false;
     }
 
     this._currentIdSync.refresh();
@@ -103,10 +102,12 @@ export class SerializableSystem implements ISerializableSystem {
     const numberOfSpaces = formatJson ? 4 : undefined;
     const changesAsString = JSON.stringify(changes, undefined, numberOfSpaces);
 
-    /*await*/ this._transerService.transferChanges(changesAsString);
+    await this._transerService.transferChanges(changesAsString);
 
     this._changesRegistry.clear();
     this.refreshObjectsRegistry();
+
+    return true;
   }
 
   receiveChanges(transerId: number, changesAsString: string): void {

@@ -8,7 +8,11 @@ export interface IApplicationContext {
 }
 
 export interface IContextService {
-  setContext(context: IApplicationContext | undefined): void;
+  setContext(context: IApplicationContext): void;
+
+  resetContext(): void;
 
   getContext(): IApplicationContext | undefined;
+
+  getContextOrThrow(): IApplicationContext;
 }

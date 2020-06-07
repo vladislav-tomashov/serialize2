@@ -45,6 +45,8 @@ class BaseSerializable<TState> implements ISerializable<TState> {
     this._state = {} as TState;
     this._id = id;
     this._serializationContext = context;
+    this._changed = false;
+    this._changes = new ObjectChanges<TState>(false);
   }
 
   getChanges(): IObjectChanges {
@@ -74,12 +76,6 @@ class BaseSerializable<TState> implements ISerializable<TState> {
       throw new Error(`Serialization context was not provided`);
     }
 
-    // if (this._changed) {
-    //   throw new Error("Object is changed!");
-    // }
-
-    this._changed = false;
-
     changes.log.forEach((change) => {
       const { op, d } = change;
 
@@ -88,6 +84,7 @@ class BaseSerializable<TState> implements ISerializable<TState> {
       }
 
       const [prop, value] = d;
+
       const newValue = (fromSerializedValue(
         value,
         this._serializationContext as ISerializationContext
@@ -107,6 +104,10 @@ class BaseSerializable<TState> implements ISerializable<TState> {
   }
 
   getAllProperties(): TState {
+    return this._state;
+  }
+
+  toJSON(): TState {
     return this._state;
   }
 
@@ -131,9 +132,15 @@ class BaseSerializable<TState> implements ISerializable<TState> {
   }
 
   private _setChanged() {
-    if (!this._changed) {
-      (this._serializationContext as ISerializationContext).setChanged(this);
+    if (this._changed) {
+      return;
     }
+
+    if (!this._serializationContext) {
+      throw new Error(`Serialization context was not provided`);
+    }
+
+    this._serializationContext.setChanged(this);
   }
 }
 

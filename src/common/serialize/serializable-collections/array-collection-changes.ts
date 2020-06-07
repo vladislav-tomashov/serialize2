@@ -23,7 +23,7 @@ type TSpliceChange<T> = [
   CollectionChangeType.Splice,
   number,
   number | undefined,
-  T[] | undefined,
+  T[] | undefined
 ];
 
 type TChange<T> =
@@ -37,7 +37,7 @@ type TChange<T> =
 
 function getChange<T>(
   change: TChange<T>,
-  source: ISerializable<T[]>,
+  source: ISerializable<T[]>
 ): TCollectionChange<TSerializableValue> | undefined {
   const [changeType] = change;
 
@@ -93,10 +93,11 @@ function getChange<T>(
 export class ArrayCollectionChanges<T> implements IChangeObject<T[]> {
   private _log: TChange<T>[] = [];
 
-  private _allPropertiesChanged = true;
+  constructor(private _allPropertiesChanged = true) {}
 
   clear(): void {
     this._log = [];
+    this._resetAllPropertiesChanged();
   }
 
   setAllPropertiesChanged(): void {
@@ -218,5 +219,12 @@ export class ArrayCollectionChanges<T> implements IChangeObject<T[]> {
     });
 
     return { id, log };
+  }
+
+  // private
+  private _resetAllPropertiesChanged(): void {
+    if (this._allPropertiesChanged) {
+      this._allPropertiesChanged = false;
+    }
   }
 }

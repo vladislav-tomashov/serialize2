@@ -15,7 +15,7 @@ export interface IChangesTransferService {
 
   readonly result: ITransferResult;
 
-  transferChanges(changesAsString: string): void;
+  transferChanges(changesAsString: string): Promise<void>;
 
   receiveChanges(transferId: number, changesAsString: string): any;
 }

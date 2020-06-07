@@ -56,6 +56,8 @@ class BaseChangableArrayCollection<TItem> extends ArrayCollection<TItem>
 
     this._id = id;
     this._serializationContext = context;
+    this._changed = false;
+    this._changes = new ArrayCollectionChanges<TItem>(false);
   }
 
   getChanges(): ICollectionChanges {
@@ -63,7 +65,7 @@ class BaseChangableArrayCollection<TItem> extends ArrayCollection<TItem>
       throw new Error(`Changes were not created`);
     }
 
-    return (this._changes as ArrayCollectionChanges<TItem>).getChanges(this);
+    return this._changes.getChanges(this);
   }
 
   clearChanges(): void {
@@ -84,10 +86,6 @@ class BaseChangableArrayCollection<TItem> extends ArrayCollection<TItem>
     if (!this._serializationContext) {
       throw new Error(`Serialization context was not provided`);
     }
-
-    // if (this._changed) {
-    //   throw new Error("Object is changed!");
-    // }
 
     this._changed = false;
 
@@ -313,9 +311,15 @@ class BaseChangableArrayCollection<TItem> extends ArrayCollection<TItem>
   }
 
   private _setChanged() {
-    if (!this._changed) {
-      (this._serializationContext as ISerializationContext).setChanged(this);
+    if (this._changed) {
+      return;
     }
+
+    if (!this._serializationContext) {
+      throw new Error(`Serialization context was not provided`);
+    }
+
+    this._serializationContext.setChanged(this);
   }
 }
 

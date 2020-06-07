@@ -2,11 +2,11 @@ import { BaseSerializable, IObjectChanges } from "../serializable-object";
 import { registerSerializableClass } from "../services";
 import { getApplicationContextOrThrow } from "../../context";
 
-export interface IStaticVariablesSyncState {
+interface IdGeneratorSyncState {
   currentId: number;
 }
 
-class IdGeneratorSync extends BaseSerializable<IStaticVariablesSyncState> {
+class IdGeneratorSync extends BaseSerializable<IdGeneratorSyncState> {
   refresh() {
     const { idGenerator } = getApplicationContextOrThrow();
     this.currentId = idGenerator.getId();
