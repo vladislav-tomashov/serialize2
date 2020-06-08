@@ -13,6 +13,7 @@ export class ChangesRegistry implements IChangesRegistry {
   }
 
   clear(): void {
+    this._changes.forEach((serializable) => serializable.clearChanges());
     this._changes.clear();
   }
 
