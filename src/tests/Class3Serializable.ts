@@ -1,14 +1,14 @@
 import { Class2Serializable, IClass2State } from "./Class2Serializable";
 import { IClass3 } from "./IClass3";
 import {
-  ChangableArrayCollection,
+  SerializableCollection,
   registerSerializableClass,
 } from "../common/serialize";
 
 interface IClass3State extends IClass2State {
   prop31: Class2Serializable;
 
-  prop32: ChangableArrayCollection<Class2Serializable>;
+  prop32: SerializableCollection<Class2Serializable>;
 }
 
 class Class3Serializable extends Class2Serializable<IClass3State>
@@ -17,7 +17,7 @@ class Class3Serializable extends Class2Serializable<IClass3State>
     super();
 
     this.prop31 = new Class2Serializable();
-    this.prop32 = new ChangableArrayCollection([
+    this.prop32 = new SerializableCollection([
       new Class2Serializable(),
       new Class2Serializable(),
     ]);
@@ -33,12 +33,12 @@ class Class3Serializable extends Class2Serializable<IClass3State>
   }
 
   public get prop32() {
-    return this.getProperty("prop32") as ChangableArrayCollection<
+    return this.getProperty("prop32") as SerializableCollection<
       Class2Serializable
     >;
   }
 
-  public set prop32(value: ChangableArrayCollection<Class2Serializable>) {
+  public set prop32(value: SerializableCollection<Class2Serializable>) {
     this._setProperty("prop32", value);
   }
 }

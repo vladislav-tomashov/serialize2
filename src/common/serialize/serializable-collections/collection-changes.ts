@@ -90,7 +90,7 @@ function getChange<T>(
   }
 }
 
-export class ArrayCollectionChanges<T> implements IChangeObject<T[]> {
+export class CollectionChanges<T> implements IChangeObject<T[]> {
   private _log: TChange<T>[] = [];
 
   constructor(private _allPropertiesChanged = true) {}

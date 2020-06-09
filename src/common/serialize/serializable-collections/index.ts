@@ -1,3 +1,3 @@
 export * from "./interfaces";
-export * from "./changable-array-collection";
-export * from "./base-changable-array-collection";
+export * from "./serializable-collection";
+export * from "./base-serializable-collection";

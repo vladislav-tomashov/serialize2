@@ -1,6 +1,6 @@
 import { ArrayCollection } from "../../collections";
 import {
-  IChangableArrayCollection,
+  ISerializableCollection,
   ICollectionChanges,
   ICollectionChange,
   TCollectionSpliceChange,
@@ -9,7 +9,7 @@ import {
   TCollectionAllChange,
   TCollectionSetChange,
 } from "./interfaces";
-import { ArrayCollectionChanges } from "./array-collection-changes";
+import { CollectionChanges } from "./collection-changes";
 import { CollectionChangeType } from "./collection-change-type";
 import {
   TSerializableValue,
@@ -19,9 +19,9 @@ import {
 import { fromSerializedValue } from "../utils";
 import { registerSerializableClass } from "../services";
 
-class BaseChangableArrayCollection<TItem> extends ArrayCollection<TItem>
-  implements IChangableArrayCollection<TItem> {
-  private _changes?: ArrayCollectionChanges<TItem>;
+class BaseSerializableCollection<TItem> extends ArrayCollection<TItem>
+  implements ISerializableCollection<TItem> {
+  private _changes?: CollectionChanges<TItem>;
 
   private _changed = true;
 
@@ -35,7 +35,7 @@ class BaseChangableArrayCollection<TItem> extends ArrayCollection<TItem>
     if (_serializationContext) {
       _serializationContext.setChanged(this);
 
-      this._changes = new ArrayCollectionChanges<TItem>();
+      this._changes = new CollectionChanges<TItem>();
     }
   }
 
@@ -57,7 +57,7 @@ class BaseChangableArrayCollection<TItem> extends ArrayCollection<TItem>
     this._id = id;
     this._serializationContext = context;
     this._changed = false;
-    this._changes = new ArrayCollectionChanges<TItem>(false);
+    this._changes = new CollectionChanges<TItem>(false);
   }
 
   getChanges(): ICollectionChanges {
@@ -323,6 +323,6 @@ class BaseChangableArrayCollection<TItem> extends ArrayCollection<TItem>
   }
 }
 
-registerSerializableClass(BaseChangableArrayCollection);
+registerSerializableClass(BaseSerializableCollection);
 
-export { BaseChangableArrayCollection };
+export { BaseSerializableCollection };

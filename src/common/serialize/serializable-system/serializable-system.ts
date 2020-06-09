@@ -12,8 +12,8 @@ import {
 } from "../services";
 import { treeToArray } from "../utils";
 import {
-  IChangableArrayCollection,
-  BaseChangableArrayCollection,
+  ISerializableCollection,
+  BaseSerializableCollection,
 } from "../serializable-collections";
 import { IdGeneratorSync } from "./id-generator-sync";
 
@@ -48,10 +48,10 @@ export class SerializableSystem implements ISerializableSystem {
     this._context
   );
 
-  private _root: IChangableArrayCollection<ISerializable<any>>;
+  private _root: ISerializableCollection<ISerializable<any>>;
 
   constructor(predefinedSerializables: Array<ISerializable<any>> = []) {
-    this._root = new BaseChangableArrayCollection<ISerializable<any>>(
+    this._root = new BaseSerializableCollection<ISerializable<any>>(
       "root",
       [...predefinedSerializables, this._currentIdSync],
       this._context

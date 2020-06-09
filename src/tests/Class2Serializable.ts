@@ -1,7 +1,7 @@
 import { IClass2 } from "./IClass2";
 import { Class1Serializable } from "./Class1Serializable";
 import {
-  ChangableArrayCollection,
+  SerializableCollection,
   SerializableObject,
   registerSerializableClass,
 } from "../common/serialize";
@@ -9,7 +9,7 @@ import {
 export interface IClass2State {
   prop1: Class1Serializable;
 
-  prop2: ChangableArrayCollection<Class1Serializable>;
+  prop2: SerializableCollection<Class1Serializable>;
 }
 
 class Class2Serializable<T extends IClass2State = IClass2State>
@@ -19,7 +19,7 @@ class Class2Serializable<T extends IClass2State = IClass2State>
     super();
 
     this.prop1 = new Class1Serializable(5, "abc");
-    this.prop2 = new ChangableArrayCollection([
+    this.prop2 = new SerializableCollection([
       new Class1Serializable(1, "test1"),
       new Class1Serializable(2, "test2"),
     ]);
@@ -35,12 +35,12 @@ class Class2Serializable<T extends IClass2State = IClass2State>
   }
 
   public get prop2() {
-    return (this.getProperty("prop2") as unknown) as ChangableArrayCollection<
+    return (this.getProperty("prop2") as unknown) as SerializableCollection<
       Class1Serializable
     >;
   }
 
-  public set prop2(value: ChangableArrayCollection<Class1Serializable>) {
+  public set prop2(value: SerializableCollection<Class1Serializable>) {
     this._setProperty("prop2", (value as unknown) as T[keyof T]);
   }
 }

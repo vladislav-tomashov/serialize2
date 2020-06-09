@@ -17,7 +17,7 @@ export type TCollectionUnshiftChange<T> = T[];
 export type TCollectionSpliceChange<T> = [
   number,
   number | undefined,
-  T[] | undefined,
+  T[] | undefined
 ];
 
 export type TCollectionChange<T> =
@@ -34,6 +34,6 @@ export interface ICollectionChanges extends IChanges {
   log: ICollectionChange[];
 }
 
-export interface IChangableArrayCollection<T>
+export interface ISerializableCollection<T>
   extends ISerializable<T[]>,
     IArrayCollection<T> {}

@@ -1,6 +1,6 @@
 import { IClass1 } from "./IClass1";
 import {
-  ChangableArrayCollection,
+  SerializableCollection,
   SerializableObject,
   registerSerializableClass,
 } from "../common/serialize";
@@ -14,7 +14,7 @@ interface IClass1State {
 
   _prop4: string;
 
-  _arr: ChangableArrayCollection<number>;
+  _arr: SerializableCollection<number>;
 }
 
 class Class1Serializable extends SerializableObject<IClass1State>
@@ -33,11 +33,11 @@ class Class1Serializable extends SerializableObject<IClass1State>
     if (arg1 === 1) {
       this._prop2 = 5;
       this._prop4 = "goodbye" + this._prop1;
-      this._arr = new ChangableArrayCollection<number>([1, 2, 3]);
+      this._arr = new SerializableCollection<number>([1, 2, 3]);
     } else {
       this._prop2 = 6;
       this._prop4 = "hello";
-      this._arr = new ChangableArrayCollection<number>([4, 5, 6]);
+      this._arr = new SerializableCollection<number>([4, 5, 6]);
     }
 
     this.prop3 = "abc" + this._prop4;
@@ -69,10 +69,10 @@ class Class1Serializable extends SerializableObject<IClass1State>
   }
 
   private get _arr() {
-    return this.getProperty("_arr") as ChangableArrayCollection<number>;
+    return this.getProperty("_arr") as SerializableCollection<number>;
   }
 
-  private set _arr(value: ChangableArrayCollection<number>) {
+  private set _arr(value: SerializableCollection<number>) {
     this._setProperty("_arr", value);
   }
 

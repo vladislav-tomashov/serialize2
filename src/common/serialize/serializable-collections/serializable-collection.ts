@@ -1,10 +1,8 @@
-import { BaseChangableArrayCollection } from "./base-changable-array-collection";
+import { BaseSerializableCollection } from "./base-serializable-collection";
 import { registerSerializableClass } from "../services";
 import { getApplicationContextOrThrow } from "../../context";
 
-class ChangableArrayCollection<TItem> extends BaseChangableArrayCollection<
-  TItem
-> {
+class SerializableCollection<TItem> extends BaseSerializableCollection<TItem> {
   constructor(
     value?: any,
     { idGenerator, serializationContext } = getApplicationContextOrThrow()
@@ -13,6 +11,6 @@ class ChangableArrayCollection<TItem> extends BaseChangableArrayCollection<
   }
 }
 
-registerSerializableClass(ChangableArrayCollection);
+registerSerializableClass(SerializableCollection);
 
-export { ChangableArrayCollection };
+export { SerializableCollection };

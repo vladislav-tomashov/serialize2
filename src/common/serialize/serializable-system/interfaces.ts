@@ -5,7 +5,7 @@ import {
   IChangesRegistry,
   IChangesTransferService,
 } from "../services";
-import { IChangableArrayCollection } from "../serializable-collections";
+import { ISerializableCollection } from "../serializable-collections";
 
 export interface ISerializableSystem {
   readonly classesRegistry: IClassesRegistry;
@@ -16,7 +16,7 @@ export interface ISerializableSystem {
 
   readonly transferService: IChangesTransferService;
 
-  readonly root: IChangableArrayCollection<ISerializable<any>>;
+  readonly root: ISerializableCollection<ISerializable<any>>;
 
   readonly context: ISerializationContext;
 
